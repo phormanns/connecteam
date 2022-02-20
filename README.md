@@ -1,8 +1,5 @@
-Starter Project Java JSP with Bulma
-===================================
+Connect teams by email services
+===============================
 
-Java Web Project using
-
- * Bulma CSS from bulma.io
- * HTMX from htmx.org
- * A Java Maven Web Application prepared for JSP
+a modern mailing list manager
+in java/jsp technology
