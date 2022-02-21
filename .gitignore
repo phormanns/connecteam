@@ -1,5 +1,7 @@
-target/
 nb-configuration.xml
 /.settings/
 /.classpath
 /.project
+target/
+conf/config.yaml
+conf/config.temp.yaml

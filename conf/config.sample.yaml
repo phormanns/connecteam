@@ -1,0 +1,27 @@
+
+spaces:
+- name: Mein Verein
+  description: Arbeitsbereich des Vereins e.V.
+  lists:
+  - name: Internes
+    description: Mitglieder des Vereins
+    emailAddress: members@example.org
+    imapHost: mail.example.org
+    imapLogin: usr12345
+    imapPasswd: secret00
+    imapStartTLS: true
+    smtpHost: mail.example.org
+    smtpLogin: usr12345
+    smtpPasswd: secret00
+    smtpStartTLS: true
+  - name: Newsletter
+    description: Newsletter des Vereins
+    emailAddress: news@example.org
+    imapHost: mail.example.org
+    imapLogin: usr12345
+    imapPasswd: secret00
+    imapStartTLS: true
+    smtpHost: mail.example.org
+    smtpLogin: usr12345
+    smtpPasswd: secret00
+    smtpStartTLS: true
