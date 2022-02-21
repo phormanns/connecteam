@@ -3,11 +3,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
     <aside class="menu">
       <p class="menu-label">
-        Administration
+        Moderation
       </p>
       <ul class="menu-list">
-        <li><a>Team Settings</a></li>
-        <li><a>Authentication</a></li>
+        <li><a>An-/Abmeldungen</a></li>
+        <li><a>Nachrichten</a></li>
       </ul>
       <p class="menu-label">
         Communities
