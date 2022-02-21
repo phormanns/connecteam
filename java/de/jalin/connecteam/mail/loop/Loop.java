@@ -4,6 +4,8 @@ public class Loop {
 
 	private boolean isRunning;
 	
+	public Loop() { }
+	
 	public void start() {
 		isRunning = true;
 		while (isRunning) {

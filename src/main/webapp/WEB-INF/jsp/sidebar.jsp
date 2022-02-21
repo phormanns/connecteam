@@ -13,22 +13,10 @@
         Communities
       </p>
       <ul class="menu-list">
-        <li><a>Gospelchor Living Voices</a>
+        <li><a>Mein Verein</a>
           <ul>
-            <li><a>Aktive</a></li>
-            <li><a>Voices</a></li>
-          </ul>
-        </li>
-        <li><a>Unternehmerinnen Krefeld</a>
-          <ul>
-            <li><a>Stammtisch</a></li>
-            <li><a>Werbung</a></li>
-          </ul>
-        </li>
-        <li><a>SMB Krefeld Linn</a>
-          <ul>
-            <li><a>Pilger</a></li>
-            <li><a>Vorstand</a></li>
+            <li><a>Internes</a></li>
+            <li><a>Newsletter</a></li>
           </ul>
         </li>
       </ul>
