@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
     <nav class="navbar" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
-        <a class="navbar-item" href="https://www.hostsharing.net/">
+        <a class="navbar-item" href="https://www.connecteam.de/">
           <img src="<%= request.getContextPath() %>/assets/connecteam.png" width="112" height="28">
         </a>
     

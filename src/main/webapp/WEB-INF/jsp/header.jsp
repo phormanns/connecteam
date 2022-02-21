@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Bumla Starter</title>
+    <title>connecteam</title>
     <!-- Bulma-CSS -->
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/webjars/bulma/0.9.3/css/bulma.min.css" />
     <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/style.css" />
