@@ -5,6 +5,7 @@ public class Mailinglist {
 	private String emailAddress;
 	private String name;
 	private String description;
+	private String[] subscribers;
 	
 	private String imapHost;
 	private String imapLogin;
@@ -104,6 +105,14 @@ public class Mailinglist {
 
 	public void setSmtpStartTLS(boolean smtpStartTLS) {
 		this.smtpStartTLS = smtpStartTLS;
+	}
+
+	public String[] getSubscribers() {
+		return subscribers;
+	}
+
+	public void setSubscribers(String[] subscribers) {
+		this.subscribers = subscribers;
 	}
 
 	

@@ -20,14 +20,14 @@ public class MessageTransformer {
 		final Address[] fromAddresses = message.getFrom();
 		final Address[] recipientAddresses = message.getAllRecipients();
 		final Address from = fromAddresses[0];
-		email.setFromAddress(mailinglist.getEmailAddress());
+		email.setFromAddress(mailinglist.getName() + " <" + mailinglist.getEmailAddress() + ">");
 		if (from instanceof InternetAddress) {
 			InternetAddress iFrom = (InternetAddress) from;
 			String personal = iFrom.getPersonal();
 			email.setFromAddress(personal + " <" + mailinglist.getEmailAddress() + ">");
 		}
 		email.setSubject(subject);
-		email.setToAddress(recipientAddresses[0].toString());
+		email.setToAddress(mailinglist.getName() + " <" + mailinglist.getEmailAddress() + ">");
 		return email;
 	}
 
