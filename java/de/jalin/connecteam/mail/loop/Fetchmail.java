@@ -1,17 +1,18 @@
 package de.jalin.connecteam.mail.loop;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.etc.Mailinglist;
 import de.jalin.connecteam.mail.message.MailinglistMessage;
-import de.jalin.connecteam.mail.message.MessageTransformer;
-import jakarta.mail.Flags.Flag;
-import jakarta.mail.Folder;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
-import jakarta.mail.Store;
+import de.jalin.connecteam.mail.message.MessageParser;
+import javax.mail.Flags.Flag;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
 
 public class Fetchmail {
 
@@ -33,7 +34,7 @@ public class Fetchmail {
 						Message message = child.getMessage(idx);
 						boolean isSeen = message.isSet(Flag.SEEN);
 						if (!isSeen) {
-							MessageTransformer messageTransformer = new MessageTransformer(ml);
+							MessageParser messageTransformer = new MessageParser(ml);
 							MailinglistMessage eMailMessage = messageTransformer.parseMessage(message);
 							log.info("message from: " + eMailMessage.getFromAddress());
 							
@@ -49,7 +50,7 @@ public class Fetchmail {
 			}
 			
 			store.close();
-		} catch (MessagingException e) {
+		} catch (MessagingException | IOException e) {
 			
 		}
 	}

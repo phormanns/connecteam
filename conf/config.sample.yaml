@@ -14,6 +14,9 @@ spaces:
     smtpLogin: usr12345
     smtpPasswd: secret00
     smtpStartTLS: true
+    subscribers:
+     - hallo@example.com
+     - anna-paulsen@example.org
   - name: Newsletter
     description: Newsletter des Vereins
     emailAddress: news@example.org
@@ -25,3 +28,6 @@ spaces:
     smtpLogin: usr12345
     smtpPasswd: secret00
     smtpStartTLS: true
+    subscribers:
+     - hallo@example.com
+     - jim.knopf@example.org

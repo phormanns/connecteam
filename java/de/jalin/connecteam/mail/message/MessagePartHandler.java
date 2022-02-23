@@ -2,7 +2,7 @@ package de.jalin.connecteam.mail.message;
 
 
 import de.jalin.connecteam.etc.CxException;
-import jakarta.mail.BodyPart;
+import javax.mail.BodyPart;
 
 public interface MessagePartHandler {
 
