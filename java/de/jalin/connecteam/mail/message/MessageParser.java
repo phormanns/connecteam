@@ -1,16 +1,15 @@
 package de.jalin.connecteam.mail.message;
 
-import java.io.IOException;
+import javax.mail.Message;
+import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.mail.util.MimeMessageParser;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
+
+import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.etc.Mailinglist;
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 public class MessageParser {
 
@@ -22,49 +21,29 @@ public class MessageParser {
 		this.mailinglist = ml;
 	}
 
-	public MailinglistMessage parseMessage(Message message) throws MessagingException, IOException {
+	public MailinglistMessage parseMessage(Message message) throws CxException {
 		final MailinglistMessage email = new MailinglistMessage();
-		final String subject = message.getSubject();
-		final Address[] fromAddresses = message.getFrom();
-		final Address[] recipientAddresses = message.getAllRecipients();
-		final Address from = fromAddresses[0];
-		email.setFromAddress(mailinglist.getName() + " <" + mailinglist.getEmailAddress() + ">");
-		if (from instanceof InternetAddress) {
-			final InternetAddress iFrom = (InternetAddress) from;
-			final String personal = iFrom.getPersonal();
-			email.setFromAddress(personal + " <" + mailinglist.getEmailAddress() + ">");
-		}
-		email.setSubject(subject);
-		email.setToAddress(mailinglist.getName() + " <" + mailinglist.getEmailAddress() + ">");
 		if (message instanceof MimeMessage) {
-			final MimeMessage mimeMessage = (MimeMessage) message;
-			final Object contentObject = mimeMessage.getContent();
-			if (contentObject instanceof String) {
-				email.setTextContent((String) contentObject);
-			}
-			if (contentObject instanceof Multipart) {
-				final Multipart multipart = (Multipart) contentObject;
-				extractParts(multipart);
+			final MimeMessageParser parser = new MimeMessageParser((MimeMessage) message);
+			try {
+				parser.parse();
+				email.setSubject(parser.getSubject());
+				email.setTextContent(parser.getPlainContent());
+				final String htmlContent = parser.getHtmlContent();
+				if (htmlContent != null && !htmlContent.isEmpty()) {
+					email.setHtmlContent(Jsoup.clean(htmlContent, Safelist.basic()));
+				}
+				email.setFromAddress(parser.getFrom());
+				email.setToAddress(parser.getTo().get(0).toString());
+				log.info("Subject: " + email.getSubject());
+				log.info("From: " + email.getFromAddress());
+				log.info("To: " + email.getToAddress());
+			} catch (Exception e) {
+				log.error(e);
+				throw new CxException(e);
 			}
 		}
 		return email;
-	}
-
-	public void extractParts(final Multipart multipart) throws MessagingException, IOException {
-		for (int idx = 0; idx < multipart.getCount(); idx++) {
-			final BodyPart part = multipart.getBodyPart(idx);
-			log.info("ContentType: " + part.getContentType());
-			log.info("Description: " + part.getDescription());
-			log.info("FileName: " + part.getFileName());
-			log.info("Disposition: " + part.getDisposition());
-			if (part.getContentType() != null && part.getContentType().startsWith("multipart")) {
-				final Object contentObject = part.getContent();
-				if (contentObject instanceof Multipart) {
-					final Multipart innerPart = (Multipart) contentObject;
-					extractParts(innerPart);
-				}
-			}
-		}
 	}
 
 }
