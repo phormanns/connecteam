@@ -28,7 +28,7 @@ public class Fetchmail {
 		try {
 			sendQueue = new ArrayList<>();
 			final MessageParser messageTransformer = new MessageParser(ml);
-			final Session session = Session.getDefaultInstance(new Properties());
+			final Session session = Session.getInstance(new Properties());
 			final Store store = session.getStore("imaps");
 			store.connect(ml.getImapHost(), ml.getImapLogin(), ml.getImapPasswd());
 			final Folder defaultFolder = store.getDefaultFolder();
@@ -57,16 +57,19 @@ public class Fetchmail {
 				
 				child.close();
 			}
-			
 			store.close();
-			final Sendmail send = new Sendmail();
-			sendQueue.forEach(new Consumer<MailinglistMessage>() {
-				@Override
-				public void accept(MailinglistMessage msg) {
-					send.send(ml, msg);
-				}
-			});
-			sendQueue.clear();
+			
+			if (!sendQueue.isEmpty()) {
+				final Sendmail sendmail = new Sendmail(ml);
+				sendQueue.forEach(new Consumer<MailinglistMessage>() {
+					@Override
+					public void accept(MailinglistMessage msg) {
+						sendmail.send(msg);
+					}
+				});
+				sendQueue.clear();
+				sendmail.close();
+			}
 		} catch (MessagingException e) {
 			
 		}
