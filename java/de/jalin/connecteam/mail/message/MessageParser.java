@@ -1,7 +1,7 @@
 package de.jalin.connecteam.mail.message;
 
-import javax.mail.Message;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Message;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.jsoup.Jsoup;

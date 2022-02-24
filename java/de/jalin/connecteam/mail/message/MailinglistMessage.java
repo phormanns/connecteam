@@ -33,6 +33,10 @@ public class MailinglistMessage {
 	}
 
 	public String getHtmlContent() {
+		if (htmlContent == null || htmlContent.isEmpty()) {
+			final HtmlHelper helper = new HtmlHelper();
+			return helper.getFormattedText(textContent);
+		}
 		return htmlContent;
 	}
 
