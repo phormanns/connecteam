@@ -5,7 +5,7 @@ public class MailinglistMessage {
 	private String subject;
 	private String fromAddress;
 	private String toAddress;
-	private String htmlContent;
+//	private String htmlContent;
 	private String textContent;
 	
 	public String getSubject() {
@@ -32,17 +32,17 @@ public class MailinglistMessage {
 		this.toAddress = toAddress;
 	}
 
-	public String getHtmlContent() {
-		if (htmlContent == null || htmlContent.isEmpty()) {
-			final HtmlHelper helper = new HtmlHelper();
-			return helper.getFormattedText(textContent);
-		}
-		return htmlContent;
-	}
+//	public String getHtmlContent() {
+//		if (htmlContent == null || htmlContent.isEmpty()) {
+//			final Text2Html helper = new Text2Html();
+//			return helper.getFormattedText(textContent);
+//		}
+//		return htmlContent;
+//	}
 
-	public void setHtmlContent(String htmlContent) {
-		this.htmlContent = htmlContent;
-	}
+//	public void setHtmlContent(String htmlContent) {
+//		this.htmlContent = htmlContent;
+//	}
 
 	public String getTextContent() {
 		return textContent;

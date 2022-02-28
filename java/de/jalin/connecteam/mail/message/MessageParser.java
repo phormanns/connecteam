@@ -5,6 +5,8 @@ import jakarta.mail.internet.MimeMessage;
 
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
 
 import de.jalin.connecteam.etc.CxException;
@@ -17,8 +19,8 @@ public class MessageParser {
 	
 	private final Mailinglist mailinglist;
 
-	public MessageParser(Mailinglist ml) {
-		this.mailinglist = ml;
+	public MessageParser(Mailinglist mailinglist) {
+		this.mailinglist = mailinglist;
 	}
 
 	public MailinglistMessage parseMessage(Message message) throws CxException {
@@ -31,10 +33,17 @@ public class MessageParser {
 				email.setTextContent(parser.getPlainContent());
 				final String htmlContent = parser.getHtmlContent();
 				if (htmlContent != null && !htmlContent.isEmpty()) {
-					email.setHtmlContent(Jsoup.clean(htmlContent, Safelist.basic()));
+					final Document dirty = Jsoup.parse(htmlContent);
+					final Cleaner cleaner = new Cleaner(Safelist.basic());
+			        final Document clean = cleaner.clean(dirty);
+			        final Html2PlainText html2PlainText = new Html2PlainText();
+			        final String plainText = html2PlainText.getPlainText(clean);
+			        email.setTextContent(plainText);
 				}
-				email.setFromAddress(parser.getFrom());
-				email.setToAddress(parser.getTo().get(0).toString());
+				final String listAddress = mailinglist.getEmailAddress();
+				String from = parser.getFrom();
+				email.setFromAddress(patchSenderAddress(from, listAddress));
+				email.setToAddress(mailinglist.getName() + " <" + listAddress + ">");
 				log.info("Subject: " + email.getSubject());
 				log.info("From: " + email.getFromAddress());
 				log.info("To: " + email.getToAddress());
@@ -46,4 +55,15 @@ public class MessageParser {
 		return email;
 	}
 
+	public String patchSenderAddress(String senderAddress, String mlAddress) {
+		return senderAddress.replaceFirst("<[a-zA-Z0-9_\\.\\-\\+]+@[a-zA-Z0-9_\\.\\-]+>", "<" + mlAddress + ">");
+	}
+	
+	public static void main(String[] args) {
+		MessageParser parser = new MessageParser(new Mailinglist());
+		System.out.println(parser.patchSenderAddress("Darestiet <h@darestiet.de>", "mail@wikv.de"));
+		System.out.println(parser.patchSenderAddress("Darestiet <hallo-list@darestiet.de>", "mail@wikv.de"));
+		System.out.println(parser.patchSenderAddress("Darestiet <hallo+subscribe@darestiet.de>", "mail@wikv.de"));
+	}
+	
 }

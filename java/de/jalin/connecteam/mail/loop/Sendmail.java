@@ -31,7 +31,7 @@ public class Sendmail {
 	public void send(MailinglistMessage msg) {
 		try {
 			for (String subs : mailinglist.getSubscribers()) {
-				smtpSend(mailinglist.getSmtpHost(), "587", mailinglist.getEmailAddress(), subs, msg.getSubject(), msg.getHtmlContent());
+				smtpSend(mailinglist.getSmtpHost(), "587", mailinglist.getEmailAddress(), subs, msg.getSubject(), msg.getTextContent());
 			}
 		} catch (CxException e) {
 			log.error(e);
@@ -61,7 +61,7 @@ public class Sendmail {
 			}
 			try (PrintWriter wr = new PrintWriter(sendMessageData)) {
 			    final SimpleSMTPHeader header = new SimpleSMTPHeader(fromAddress, toAddress, subject);
-			    header.addHeaderField("Content-Type", "text/html; charset=ISO-8859-1");
+			    header.addHeaderField("Content-Type", "text/plain; charset=ISO-8859-1");
 			    header.addHeaderField("Content-Transfer-Encoding", "8bit");
 			    wr.write(header.toString());
 			    wr.write(text);

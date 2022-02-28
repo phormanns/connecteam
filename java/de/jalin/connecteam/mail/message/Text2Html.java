@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-public class HtmlHelper {
+public class Text2Html {
 
 	private static final String REGEXP_HTTP_TEXT_LINK = "(https?://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])";
 	private static final String HTTP_LINK_REPLACEMENT = "<a href=\"$1\" target=\"_new\">$1</a>";
