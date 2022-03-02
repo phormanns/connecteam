@@ -10,6 +10,16 @@ CREATE TABLE topic (
     address character varying(96) NOT NULL,
     name character varying(96) NOT NULL,
     description text,
+    imap_host character varying(96) NOT NULL,
+    imap_port integer NOT NULL,
+    imap_starttls boolean NOT NULL,
+    imap_login character varying(96) NOT NULL,
+    imap_passwd character varying(96) NOT NULL,
+    smtp_host character varying(96) NOT NULL,
+    smtp_port integer NOT NULL,
+    smtp_starttls boolean NOT NULL,
+    smtp_login character varying(96) NOT NULL,
+    smtp_passwd character varying(96) NOT NULL,
     CONSTRAINT fk_workspace
       FOREIGN KEY(workspace_id) REFERENCES workspace(id)
 );
@@ -28,7 +38,6 @@ CREATE TABLE subscription (
     moderator boolean NOT NULL,
     subscribe_date TIMESTAMP,
     unsubscribe_date TIMESTAMP,
-    active boolean NOT NULL,
     CONSTRAINT fk_subscriber
       FOREIGN KEY(subscriber_id) REFERENCES subscriber(id),
     CONSTRAINT fk_topic
