@@ -11,10 +11,9 @@ import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
-
+import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
-import de.jalin.connecteam.etc.Mailinglist;
 import de.jalin.connecteam.mail.message.MailinglistMessage;
 import de.jalin.connecteam.mail.message.MessageParser;
 
@@ -24,13 +23,13 @@ public class Fetchmail {
 
 	private List<MailinglistMessage> sendQueue = null;
 	
-	public void fetch(Mailinglist ml) {
+	public void fetch(Topic topic) {
 		try {
 			sendQueue = new ArrayList<>();
-			final MessageParser messageTransformer = new MessageParser(ml);
+			final MessageParser messageTransformer = new MessageParser(topic);
 			final Session session = Session.getInstance(new Properties());
 			final Store store = session.getStore("imaps");
-			store.connect(ml.getImapHost(), ml.getImapLogin(), ml.getImapPasswd());
+			store.connect(topic.getImapAccount().getHost(), topic.getImapAccount().getLogin(), topic.getImapAccount().getPasswd());
 			final Folder defaultFolder = store.getDefaultFolder();
 			final Folder[] children = defaultFolder.listSubscribed();
 			for (Folder child : children) {
@@ -60,7 +59,7 @@ public class Fetchmail {
 			store.close();
 			
 			if (!sendQueue.isEmpty()) {
-				final Sendmail sendmail = new Sendmail(ml);
+				final Sendmail sendmail = new Sendmail(topic);
 				sendQueue.forEach(new Consumer<MailinglistMessage>() {
 					@Override
 					public void accept(MailinglistMessage msg) {

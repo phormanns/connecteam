@@ -2,43 +2,40 @@ package de.jalin.connecteam.mail.loop;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Properties;
 
+import de.jalin.connecteam.data.DataAccess;
+import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.Config;
+import de.jalin.connecteam.etc.CxException;
+import de.jalin.connecteam.etc.Database;
 import de.jalin.connecteam.etc.Logger;
-import de.jalin.connecteam.etc.Mailinglist;
-import de.jalin.connecteam.etc.Space;
 
 public class Loop {
 
 	private static Logger log = Logger.getLogger("Loop.class"); 
 	
 	private boolean isRunning;
-	private final List<Mailinglist> lists;
+	private Collection<Topic> topics;
+	private DataAccess dataAccess;
 	
-	public Loop(Config conf) { 
-		final List<Space> spaces = conf.getSpaces();
-		lists = new ArrayList<>();
-		for (Space s : spaces) {
-			s.getLists().forEach(new Consumer<Mailinglist>() {
-				@Override
-				public void accept(Mailinglist ml) {
-					lists.add(ml);
-				}
-			});
-		}
+	public Loop(final Connection dbConnection) throws CxException {
+		dataAccess = new DataAccess(dbConnection);
+		topics = dataAccess.listTopics();
 	}
 	
-	public void start() {
+	public void start() throws CxException {
 		final Fetchmail fetchmail = new Fetchmail();
-		
 		isRunning = true;
 		log.info("start loop");
 		while (isRunning) {
-			for (Mailinglist ml : lists) {
-				fetchmail.fetch(ml);
+			for (Topic topic : topics) {
+				final Topic loadedTopic = dataAccess.loadTopic(topic.getAddress());
+				fetchmail.fetch(loadedTopic);
 			}
 			sleep(1);
 		}
@@ -56,11 +53,17 @@ public class Loop {
 	public static void main(String[] args) {
 		try {
 			Config conf = Config.load(Paths.get("conf/config.yaml"));
-			Loop loop = new Loop(conf);
+			Database database = conf.getDatabase();
+			
+			String url = "jdbc:postgresql://" + database.getHost() + ":" + database.getPort() + "/" + database.getName();
+			final Properties props = new Properties();
+			props.setProperty("user", database.getUser());
+			props.setProperty("password", database.getPassword());
+			final Connection conn = DriverManager.getConnection(url, props);			
+			final Loop loop = new Loop(conn);
 			loop.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (IOException | CxException | SQLException e) {
+			log.error(e);
 		}
 	}
 	

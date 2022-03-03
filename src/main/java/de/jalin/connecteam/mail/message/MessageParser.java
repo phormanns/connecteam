@@ -9,17 +9,17 @@ import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
 
+import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
-import de.jalin.connecteam.etc.Mailinglist;
 
 public class MessageParser {
 
 	private final static Logger log = Logger.getLogger("MessageTransformer.class");
 	
-	private final Mailinglist mailinglist;
+	private final Topic mailinglist;
 
-	public MessageParser(Mailinglist mailinglist) {
+	public MessageParser(Topic mailinglist) {
 		this.mailinglist = mailinglist;
 	}
 
@@ -40,7 +40,7 @@ public class MessageParser {
 			        final String plainText = html2PlainText.getPlainText(clean);
 			        email.setTextContent(plainText);
 				}
-				final String listAddress = mailinglist.getEmailAddress();
+				final String listAddress = mailinglist.getAddress();
 				String from = parser.getFrom();
 				email.setFromAddress(patchSenderAddress(from, listAddress));
 				email.setToAddress(mailinglist.getName() + " <" + listAddress + ">");
@@ -57,13 +57,6 @@ public class MessageParser {
 
 	public String patchSenderAddress(String senderAddress, String mlAddress) {
 		return senderAddress.replaceFirst("<[a-zA-Z0-9_\\.\\-\\+]+@[a-zA-Z0-9_\\.\\-]+>", "<" + mlAddress + ">");
-	}
-	
-	public static void main(String[] args) {
-		MessageParser parser = new MessageParser(new Mailinglist());
-		System.out.println(parser.patchSenderAddress("Darestiet <h@darestiet.de>", "mail@wikv.de"));
-		System.out.println(parser.patchSenderAddress("Darestiet <hallo-list@darestiet.de>", "mail@wikv.de"));
-		System.out.println(parser.patchSenderAddress("Darestiet <hallo+subscribe@darestiet.de>", "mail@wikv.de"));
 	}
 	
 }

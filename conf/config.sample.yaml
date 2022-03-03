@@ -1,33 +1,7 @@
 
-spaces:
-- name: Mein Verein
-  description: Arbeitsbereich des Vereins e.V.
-  lists:
-  - name: Internes
-    description: Mitglieder des Vereins
-    emailAddress: members@example.org
-    imapHost: mail.example.org
-    imapLogin: usr12345
-    imapPasswd: secret00
-    imapStartTLS: true
-    smtpHost: mail.example.org
-    smtpLogin: usr12345
-    smtpPasswd: secret00
-    smtpStartTLS: true
-    subscribers:
-     - hallo@example.com
-     - anna-paulsen@example.org
-  - name: Newsletter
-    description: Newsletter des Vereins
-    emailAddress: news@example.org
-    imapHost: mail.example.org
-    imapLogin: usr12345
-    imapPasswd: secret00
-    imapStartTLS: true
-    smtpHost: mail.example.org
-    smtpLogin: usr12345
-    smtpPasswd: secret00
-    smtpStartTLS: true
-    subscribers:
-     - hallo@example.com
-     - jim.knopf@example.org
+database:
+  host: localhost
+  port: 5432
+  name: dbname
+  user: dbuser
+  password: secret00

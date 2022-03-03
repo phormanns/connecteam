@@ -5,8 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -15,20 +13,20 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 public class Config {
 
-	private java.util.List<Space> spaces;
+	private Database database;
 	
 	public Config() {
-		spaces = new ArrayList<>();
+		database = new Database();
 	}
 	
-	public List<Space> getSpaces() {
-		return spaces;
+	public Database getDatabase() {
+		return database;
 	}
 
-	public void setSpaces(java.util.List<Space> spaces) {
-		this.spaces = spaces;
+	public void setDatabase(Database database) {
+		this.database = database;
 	}
-	
+
 	public void dump(Path configPath) throws IOException {
 		final DumperOptions options = new DumperOptions();
 		options.setDefaultFlowStyle(FlowStyle.BLOCK);
@@ -44,7 +42,7 @@ public class Config {
 	}
 
 	public static void main(String[] args) {
-		final Path sampleConfigPath = Paths.get("./conf/config.sample.yaml");
+		final Path sampleConfigPath = Paths.get("./conf/config.yaml");
 		final Path tempConfigPath = Paths.get("./conf/config.temp.yaml");
 		try {
 			final Config config = Config.load(sampleConfigPath);
