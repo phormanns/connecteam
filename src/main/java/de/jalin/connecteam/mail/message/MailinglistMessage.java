@@ -1,13 +1,32 @@
 package de.jalin.connecteam.mail.message;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.jalin.connecteam.etc.RandomIdent;
+
 public class MailinglistMessage {
 
+	private final String random;
 	private String subject;
 	private String fromAddress;
+	private String originalFrom;
 	private String toAddress;
-//	private String htmlContent;
 	private String textContent;
+	private Map<String, AttachmentPath> attachments;
 	
+	
+	public MailinglistMessage() {
+		final RandomIdent randomIdent = new RandomIdent();
+		random = randomIdent.nextIdent();
+		attachments = new HashMap<>();
+	}
+	
+	public String getRandom() {
+		return random;
+	}
+
 	public String getSubject() {
 		return subject;
 	}
@@ -24,6 +43,14 @@ public class MailinglistMessage {
 		this.fromAddress = fromAddress;
 	}
 
+	public String getOriginalFrom() {
+		return originalFrom;
+	}
+
+	public void setOriginalFrom(String originalFrom) {
+		this.originalFrom = originalFrom;
+	}
+
 	public String getToAddress() {
 		return toAddress;
 	}
@@ -32,18 +59,6 @@ public class MailinglistMessage {
 		this.toAddress = toAddress;
 	}
 
-//	public String getHtmlContent() {
-//		if (htmlContent == null || htmlContent.isEmpty()) {
-//			final Text2Html helper = new Text2Html();
-//			return helper.getFormattedText(textContent);
-//		}
-//		return htmlContent;
-//	}
-
-//	public void setHtmlContent(String htmlContent) {
-//		this.htmlContent = htmlContent;
-//	}
-
 	public String getTextContent() {
 		return textContent;
 	}
@@ -51,5 +66,12 @@ public class MailinglistMessage {
 	public void setTextContent(String textContent) {
 		this.textContent = textContent;
 	}
+
+	public void attach(AttachmentPath attachment) {
+		attachments.put(attachment.getName(), attachment);
+	}
 	
+	public Collection<AttachmentPath> getAttachments() {
+		return attachments.values();
+	}
 }

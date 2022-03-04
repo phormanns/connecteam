@@ -19,17 +19,20 @@ public class Loop {
 
 	private static Logger log = Logger.getLogger("Loop.class"); 
 	
+	private final Config config;
+	
 	private boolean isRunning;
 	private Collection<Topic> topics;
 	private DataAccess dataAccess;
 	
-	public Loop(final Connection dbConnection) throws CxException {
-		dataAccess = new DataAccess(dbConnection);
-		topics = dataAccess.listTopics();
+	public Loop(final Config conf) throws CxException {
+		config = conf;
 	}
 	
-	public void start() throws CxException {
-		final Fetchmail fetchmail = new Fetchmail();
+	public void start(final Connection dbConnection) throws CxException {
+		dataAccess = new DataAccess(dbConnection);
+		topics = dataAccess.listTopics();
+		final Fetchmail fetchmail = new Fetchmail(config.getDatadir());
 		isRunning = true;
 		log.info("start loop");
 		while (isRunning) {
@@ -45,9 +48,11 @@ public class Loop {
 		try { Thread.sleep(1000L * secs); } catch (InterruptedException e) { }
 	}
 
-	public void stop() {
+	public void stop() throws IOException {
 		System.out.println("stop");
 		isRunning = false;
+		dataAccess.close();
+		dataAccess = null;
 	}
 	
 	public static void main(String[] args) {
@@ -60,8 +65,8 @@ public class Loop {
 			props.setProperty("user", database.getUser());
 			props.setProperty("password", database.getPassword());
 			final Connection conn = DriverManager.getConnection(url, props);			
-			final Loop loop = new Loop(conn);
-			loop.start();
+			final Loop loop = new Loop(conf);
+			loop.start(conn);
 		} catch (IOException | CxException | SQLException e) {
 			log.error(e);
 		}

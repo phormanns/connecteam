@@ -1,5 +1,7 @@
 package de.jalin.connecteam.data;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -17,7 +19,7 @@ import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.mail.MailAccount;
 
-public class DataAccess {
+public class DataAccess implements Closeable {
 
 	private static final Logger log = Logger.getLogger("DataAccess.class");
 	
@@ -184,6 +186,11 @@ public class DataAccess {
 		final ZonedDateTime atZone = ofEpochMilli.atZone(ZoneId.systemDefault());
 		final LocalDateTime localDateTime = atZone.toLocalDateTime();
 		return localDateTime;
+	}
+
+	@Override
+	public void close() throws IOException {
+		try { dbConnection.close(); } catch (SQLException e) { throw new IOException(e); }
 	}
 	
 }

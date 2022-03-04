@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.apache.commons.net.smtp.AuthenticatingSMTPClient;
@@ -34,17 +35,14 @@ public class Sendmail {
 	    this.random = new RandomIdent();
 	}
 	
-	public void send(MailinglistMessage msg) {
-		final String topicAddress = topic.getAddress();
-		final String subject = msg.getSubject();
-		final String content = msg.getTextContent();
+	public void send(final MailinglistMessage msg) {
 		topic.getSubscriptions().forEach(new Consumer<Subscription>() {
 			@Override
-			public void accept(Subscription subscription) {
+			public void accept(final Subscription subscription) {
 				if (subscription.isActive()) {
 					final String subscriberAddress = subscription.getSubscriber().getAddress();
 					try {
-						smtpSend(topicAddress, subscriberAddress, subject, content);
+						smtpSend(msg, subscriberAddress);
 					} catch (CxException e) {
 						log.error(e);
 					}
@@ -53,9 +51,23 @@ public class Sendmail {
 		});
 	}
 
-    private void smtpSend(final String fromAddress, final String toAddress, final String subject, final String text) throws CxException {
+	public void sendAll(final List<MailinglistMessage> sendQueue) {
+		sendQueue.forEach(new Consumer<MailinglistMessage>() {
+			@Override
+			public void accept(MailinglistMessage msg) {
+				send(msg);
+			}
+		});
+	
+	}
+
+	private void smtpSend(final MailinglistMessage msg, final String toAddress) throws CxException {
         try {
         	log.info("sending to " + toAddress);
+    		final String topicAddress = topic.getAddress();
+    		final String subject = msg.getSubject();
+    		final String content = msg.getTextContent();
+    		final String originalFrom = msg.getOriginalFrom();
 			final MailAccount smtpAccount = topic.getSmtpAccount();
 			final String smtpHost = smtpAccount.getHost();
 			final int smtpPort = smtpAccount.getPort();
@@ -81,19 +93,21 @@ public class Sendmail {
 				log.error("smtp login failed: " + smtpLogin + "@" + smtpHost + ":" + smtpPort);
 			    throw new CxException("error_smtp_client_login");
 			}
-			client.setSender(fromAddress.trim());
+			client.setSender(topicAddress.trim());
 			client.addRecipient(toAddress.trim());
 			final Writer messageWriter = client.sendMessageData();
 			if (messageWriter == null) {
 			    throw new CxException("error_sending_email_relay");
 			}
 			try (final PrintWriter printWriter = new PrintWriter(messageWriter)) {
-			    final SimpleSMTPHeader header = new SimpleSMTPHeader(fromAddress, toAddress, subject);
+			    final SimpleSMTPHeader header = new SimpleSMTPHeader(topicAddress, toAddress, subject);
 			    header.addHeaderField("Content-Type", "text/plain; charset=ISO-8859-1");
 			    header.addHeaderField("Content-Transfer-Encoding", "8bit");
-			    header.addHeaderField("Message-ID", "<" + random.nextIdent() + "-" + fromAddress + ">");
+			    header.addHeaderField("Message-ID", "<" + random.nextIdent() + "-" + topicAddress + ">");
 			    printWriter.write(header.toString());
-			    printWriter.write(text);
+			    printWriter.write("Nachricht von " + originalFrom + "\n");
+			    printWriter.write("an den Verteiler " + topicAddress + "\n\n");
+			    printWriter.write(content);
 			}
 			if (!client.completePendingCommand()) {
 			    throw new CxException("error_sending_email");

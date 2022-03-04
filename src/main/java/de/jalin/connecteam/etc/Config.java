@@ -14,9 +14,11 @@ import org.yaml.snakeyaml.constructor.Constructor;
 public class Config {
 
 	private Database database;
+	private DataDir datadir;
 	
 	public Config() {
 		database = new Database();
+		setDatadir(new DataDir());
 	}
 	
 	public Database getDatabase() {
@@ -25,6 +27,14 @@ public class Config {
 
 	public void setDatabase(Database database) {
 		this.database = database;
+	}
+
+	public DataDir getDatadir() {
+		return datadir;
+	}
+
+	public void setDatadir(DataDir datadir) {
+		this.datadir = datadir;
 	}
 
 	public void dump(Path configPath) throws IOException {

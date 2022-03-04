@@ -3,30 +3,36 @@ package de.jalin.connecteam.mail.loop;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Consumer;
 
+import de.jalin.connecteam.data.Topic;
+import de.jalin.connecteam.etc.CxException;
+import de.jalin.connecteam.etc.DataDir;
+import de.jalin.connecteam.etc.Logger;
+import de.jalin.connecteam.mail.message.MailinglistMessage;
+import de.jalin.connecteam.mail.message.MessageParser;
 import jakarta.mail.Flags.Flag;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
-import de.jalin.connecteam.data.Topic;
-import de.jalin.connecteam.etc.CxException;
-import de.jalin.connecteam.etc.Logger;
-import de.jalin.connecteam.mail.message.MailinglistMessage;
-import de.jalin.connecteam.mail.message.MessageParser;
 
 public class Fetchmail {
 
 	private static Logger log = Logger.getLogger("Fetchmail.class"); 
 
-	private List<MailinglistMessage> sendQueue = null;
+	private final DataDir datadir;
 	
-	public void fetch(Topic topic) {
+	private List<MailinglistMessage> sendQueue = null;
+
+	public Fetchmail(final DataDir datadir) {
+		this.datadir = datadir;
+	}
+	
+	public void fetch(final Topic topic) {
 		try {
 			sendQueue = new ArrayList<>();
-			final MessageParser messageTransformer = new MessageParser(topic);
+			final MessageParser messageParser = new MessageParser(topic, datadir);
 			final Session session = Session.getInstance(new Properties());
 			final Store store = session.getStore("imaps");
 			store.connect(topic.getImapAccount().getHost(), topic.getImapAccount().getLogin(), topic.getImapAccount().getPasswd());
@@ -42,34 +48,26 @@ public class Fetchmail {
 							Message message = child.getMessage(idx);
 							boolean isSeen = message.isSet(Flag.SEEN);
 							if (!isSeen) {
-								final MailinglistMessage eMailMessage = messageTransformer.parseMessage(message);
+								final MailinglistMessage eMailMessage = messageParser.parse(message);
 								sendQueue.add(eMailMessage);
 								message.setFlag(Flag.SEEN, true);
 							}
 						} catch (CxException e) {
 							log.error(e);
 						}
-						
-						
 					}
 				}
-				
 				child.close();
 			}
 			store.close();
 			
 			if (!sendQueue.isEmpty()) {
 				final Sendmail sendmail = new Sendmail(topic);
-				sendQueue.forEach(new Consumer<MailinglistMessage>() {
-					@Override
-					public void accept(MailinglistMessage msg) {
-						sendmail.send(msg);
-					}
-				});
+				sendmail.sendAll(sendQueue);
 				sendQueue.clear();
 			}
 		} catch (MessagingException e) {
-			
+			log.error(e);
 		}
 	}
 
