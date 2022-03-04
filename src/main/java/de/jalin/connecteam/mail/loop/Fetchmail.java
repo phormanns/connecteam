@@ -1,14 +1,17 @@
 package de.jalin.connecteam.mail.loop;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import de.jalin.connecteam.data.DataAccess;
 import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.DataDir;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.mail.message.MailinglistMessage;
+import de.jalin.connecteam.mail.message.MessageClassifier;
 import de.jalin.connecteam.mail.message.MessageParser;
 import jakarta.mail.Flags.Flag;
 import jakarta.mail.Folder;
@@ -21,16 +24,19 @@ public class Fetchmail {
 
 	private static Logger log = Logger.getLogger("Fetchmail.class"); 
 
+	private final Connection dbConnection;
 	private final DataDir datadir;
 	
 	private List<MailinglistMessage> sendQueue = null;
 
-	public Fetchmail(final DataDir datadir) {
+	public Fetchmail(final Connection dbConnection, final DataDir datadir) {
+		this.dbConnection = dbConnection;
 		this.datadir = datadir;
 	}
 	
-	public void fetch(final Topic topic) {
+	public void fetchAll(final Topic topic) {
 		try {
+			final DataAccess dataAccess = new DataAccess(dbConnection);
 			sendQueue = new ArrayList<>();
 			final MessageParser messageParser = new MessageParser(topic, datadir);
 			final Session session = Session.getInstance(new Properties());
@@ -49,7 +55,13 @@ public class Fetchmail {
 							boolean isSeen = message.isSet(Flag.SEEN);
 							if (!isSeen) {
 								final MailinglistMessage eMailMessage = messageParser.parse(message);
-								sendQueue.add(eMailMessage);
+								final MessageClassifier messageClassifier = new MessageClassifier(topic, eMailMessage);
+								if (messageClassifier.isAccepted()) { 
+									sendQueue.add(eMailMessage);
+									dataAccess.storeMessage(eMailMessage, topic.getId());
+								} else {
+									log.info("message from " + eMailMessage.getOriginalFrom() + " rejected.");
+								}
 								message.setFlag(Flag.SEEN, true);
 							}
 						} catch (CxException e) {
@@ -60,7 +72,6 @@ public class Fetchmail {
 				child.close();
 			}
 			store.close();
-			
 			if (!sendQueue.isEmpty()) {
 				final Sendmail sendmail = new Sendmail(topic);
 				sendmail.sendAll(sendQueue);

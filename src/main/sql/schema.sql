@@ -70,6 +70,7 @@ CREATE TABLE attachment (
     id SERIAL PRIMARY KEY,
     message_id integer NOT NULL,
     filename character varying(96) NOT NULL,
+    mime_type character varying(96) NOT NULL,
     path_token character varying(96) NOT NULL,
     CONSTRAINT fk_message
       FOREIGN KEY(message_id) REFERENCES message(id)

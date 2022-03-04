@@ -32,13 +32,13 @@ public class Loop {
 	public void start(final Connection dbConnection) throws CxException {
 		dataAccess = new DataAccess(dbConnection);
 		topics = dataAccess.listTopics();
-		final Fetchmail fetchmail = new Fetchmail(config.getDatadir());
+		final Fetchmail fetchmail = new Fetchmail(dbConnection, config.getDatadir());
 		isRunning = true;
 		log.info("start loop");
 		while (isRunning) {
 			for (Topic topic : topics) {
 				final Topic loadedTopic = dataAccess.loadTopic(topic.getAddress());
-				fetchmail.fetch(loadedTopic);
+				fetchmail.fetchAll(loadedTopic);
 			}
 			sleep(1);
 		}
@@ -51,7 +51,6 @@ public class Loop {
 	public void stop() throws IOException {
 		System.out.println("stop");
 		isRunning = false;
-		dataAccess.close();
 		dataAccess = null;
 	}
 	
@@ -67,7 +66,12 @@ public class Loop {
 			final Connection conn = DriverManager.getConnection(url, props);			
 			final Loop loop = new Loop(conf);
 			loop.start(conn);
-		} catch (IOException | CxException | SQLException e) {
+			while (loop.isRunning) {
+				Thread.sleep(500L);
+			}
+			conn.close();
+			log.info("bye");
+		} catch (IOException | CxException | SQLException | InterruptedException e) {
 			log.error(e);
 		}
 	}

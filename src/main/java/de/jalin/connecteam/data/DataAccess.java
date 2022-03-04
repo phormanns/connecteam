@@ -1,7 +1,5 @@
 package de.jalin.connecteam.data;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,8 +16,10 @@ import java.util.Map;
 import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.mail.MailAccount;
+import de.jalin.connecteam.mail.message.AttachmentPath;
+import de.jalin.connecteam.mail.message.MailinglistMessage;
 
-public class DataAccess implements Closeable {
+public class DataAccess {
 
 	private static final Logger log = Logger.getLogger("DataAccess.class");
 	
@@ -45,10 +45,59 @@ public class DataAccess implements Closeable {
 			+ "FROM subscriber scr, subscription scn "
 			+ "WHERE scr.id = scn.subscriber_id AND scn.topic_id = ? ";
 	
+	private static final String INSERT_MESSAGE =
+			  "INSERT INTO message (topic_id, subject, processing, sender, message, token)"
+			+ " values ( ?, ?, now(), ?, ?, ? )";
+
+	private static final String INSERT_ATTACHMENT =
+			  "INSERT INTO attachment (message_id, filename, mime_type, path_token)"
+			+ " values ( ?, ?, ?, ? )";
+
+	private static final String LAST_VAL =
+			  "SELECT LASTVAL() AS last_id";
+	
 	private final Connection dbConnection;
 
 	public DataAccess(final Connection dbConnection) {
 		this.dbConnection = dbConnection;
+	}
+	
+	public void storeMessage(final MailinglistMessage msg, final long topicId) {
+		log.info("store message from " + msg.getOriginalFrom());
+		PreparedStatement stmtInsertMessage = null;
+		PreparedStatement stmtInsertAttachment = null;
+		PreparedStatement stmtLastVal = null;
+		ResultSet resLastVal = null;
+		try {
+			dbConnection.setAutoCommit(false);
+			stmtInsertMessage = dbConnection.prepareStatement(INSERT_MESSAGE);
+			stmtInsertMessage.setLong(1, topicId);
+			stmtInsertMessage.setString(2, msg.getSubject());
+			stmtInsertMessage.setString(3, msg.getOriginalFrom());
+			stmtInsertMessage.setString(4, msg.getTextContent());
+			stmtInsertMessage.setString(5, msg.getRandom());
+			stmtInsertMessage.execute();
+			final Collection<AttachmentPath> attachments = msg.getAttachments();
+			if (attachments != null && !attachments.isEmpty()) {
+				stmtLastVal = dbConnection.prepareStatement(LAST_VAL);
+				resLastVal = stmtLastVal.executeQuery();
+				resLastVal.next();
+				long lastVal = resLastVal.getLong("last_id");
+				stmtInsertAttachment = dbConnection.prepareStatement(INSERT_ATTACHMENT);
+				for (AttachmentPath att : attachments) {
+					stmtInsertAttachment.setLong(1, lastVal);
+					stmtInsertAttachment.setString(2, att.getName());
+					stmtInsertAttachment.setString(3, att.getContentType());
+					stmtInsertAttachment.setString(4, att.getFilename());
+					stmtInsertAttachment.execute();
+				}
+			}
+			dbConnection.commit();
+			dbConnection.setAutoCommit(true);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public Collection<Topic> listTopics() throws CxException {
@@ -186,11 +235,6 @@ public class DataAccess implements Closeable {
 		final ZonedDateTime atZone = ofEpochMilli.atZone(ZoneId.systemDefault());
 		final LocalDateTime localDateTime = atZone.toLocalDateTime();
 		return localDateTime;
-	}
-
-	@Override
-	public void close() throws IOException {
-		try { dbConnection.close(); } catch (SQLException e) { throw new IOException(e); }
 	}
 	
 }
