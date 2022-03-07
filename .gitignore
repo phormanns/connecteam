@@ -5,3 +5,4 @@ nb-configuration.xml
 target/
 conf/config.yaml
 conf/config.temp.yaml
+conf/jetty-env.xml

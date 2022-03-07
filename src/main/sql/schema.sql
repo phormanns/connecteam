@@ -66,6 +66,9 @@ CREATE TABLE message (
       FOREIGN KEY(topic_id) REFERENCES topic(id)
 );
 
+CREATE UNIQUE INDEX message_token_idx
+	ON message(token);
+
 CREATE TABLE attachment (
     id SERIAL PRIMARY KEY,
     message_id integer NOT NULL,
@@ -75,3 +78,6 @@ CREATE TABLE attachment (
     CONSTRAINT fk_message
       FOREIGN KEY(message_id) REFERENCES message(id)
 );
+
+CREATE UNIQUE INDEX attachment_token_idx
+	ON attachment(path_token);

@@ -53,6 +53,11 @@ public class DataAccess {
 			  "INSERT INTO attachment (message_id, filename, mime_type, path_token)"
 			+ " values ( ?, ?, ?, ? )";
 
+	private static final String SELECT_ATTACHMENT = 
+			  "SELECT msg.token AS msg_token, att.path_token AS att_token, att.mime_type AS mime_type, att.filename AS filename "
+			+ " FROM message msg, attachment att"
+			+ " WHERE att.message_id = msg.id AND msg.token = ? AND att.path_token = ?";
+
 	private static final String LAST_VAL =
 			  "SELECT LASTVAL() AS last_id";
 	
@@ -60,6 +65,30 @@ public class DataAccess {
 
 	public DataAccess(final Connection dbConnection) {
 		this.dbConnection = dbConnection;
+	}
+	
+	public AttachmentPath loadAttachment(final String msgToken, final String attToken) {
+		log.info("load attachment " + msgToken + "/" + attToken);
+		PreparedStatement stmtSelectAttachment = null;
+		ResultSet resAttachment = null;
+		try {
+			stmtSelectAttachment = dbConnection.prepareStatement(SELECT_ATTACHMENT);
+			stmtSelectAttachment.setString(1, msgToken);
+			stmtSelectAttachment.setString(2, attToken);
+			resAttachment = stmtSelectAttachment.executeQuery();
+			if (resAttachment.next()) {
+				final AttachmentPath attPath = new AttachmentPath();
+				attPath.setContentType(resAttachment.getString("mime_type"));
+				attPath.setFilename(resAttachment.getString("att_token"));
+				attPath.setName(resAttachment.getString("filename"));
+				return attPath;
+			} else {
+				log.error("attachment not found " + msgToken + "/" + attToken);
+			}
+		} catch (SQLException e) {
+			log.error(e);
+		}
+		return null;
 	}
 	
 	public void storeMessage(final MailinglistMessage msg, final long topicId) {

@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -21,6 +22,7 @@ import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.etc.RandomIdent;
 import de.jalin.connecteam.mail.MailAccount;
+import de.jalin.connecteam.mail.message.AttachmentPath;
 import de.jalin.connecteam.mail.message.MailinglistMessage;
 
 public class Sendmail {
@@ -108,6 +110,11 @@ public class Sendmail {
 			    printWriter.write("Nachricht von " + originalFrom + "\n");
 			    printWriter.write("an den Verteiler " + topicAddress + "\n\n");
 			    printWriter.write(content);
+			    printWriter.write("\n\nAnlagen:\n");
+			    final Collection<AttachmentPath> attachments = msg.getAttachments();
+			    for (AttachmentPath att : attachments) {
+			    	printWriter.write(att.getName() + " http://localhost:8080/att/" + msg.getRandom() + "/" + att.getFilename() + "\n");
+			    }
 			}
 			if (!client.completePendingCommand()) {
 			    throw new CxException("error_sending_email");

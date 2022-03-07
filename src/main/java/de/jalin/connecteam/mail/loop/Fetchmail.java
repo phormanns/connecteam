@@ -54,13 +54,13 @@ public class Fetchmail {
 							Message message = child.getMessage(idx);
 							boolean isSeen = message.isSet(Flag.SEEN);
 							if (!isSeen) {
-								final MailinglistMessage eMailMessage = messageParser.parse(message);
-								final MessageClassifier messageClassifier = new MessageClassifier(topic, eMailMessage);
+								final MailinglistMessage mlMessage = messageParser.parse(message);
+								final MessageClassifier messageClassifier = new MessageClassifier(topic, mlMessage);
 								if (messageClassifier.isAccepted()) { 
-									sendQueue.add(eMailMessage);
-									dataAccess.storeMessage(eMailMessage, topic.getId());
+									dataAccess.storeMessage(mlMessage, topic.getId());
+									sendQueue.add(mlMessage);
 								} else {
-									log.info("message from " + eMailMessage.getOriginalFrom() + " rejected.");
+									log.info("message from " + mlMessage.getOriginalFrom() + " rejected.");
 								}
 								message.setFlag(Flag.SEEN, true);
 							}

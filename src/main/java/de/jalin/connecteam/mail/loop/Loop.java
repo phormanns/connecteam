@@ -1,47 +1,36 @@
 package de.jalin.connecteam.mail.loop;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Properties;
 
 import de.jalin.connecteam.data.DataAccess;
 import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.Config;
 import de.jalin.connecteam.etc.CxException;
-import de.jalin.connecteam.etc.Database;
 import de.jalin.connecteam.etc.Logger;
 
-public class Loop {
+public class Loop implements Runnable {
 
 	private static Logger log = Logger.getLogger("Loop.class"); 
 	
 	private final Config config;
 	
-	private boolean isRunning;
+	private boolean running;
 	private Collection<Topic> topics;
 	private DataAccess dataAccess;
+
+	private Fetchmail fetchmail;
 	
 	public Loop(final Config conf) throws CxException {
 		config = conf;
 	}
 	
-	public void start(final Connection dbConnection) throws CxException {
+	public void init(final Connection dbConnection) throws CxException {
 		dataAccess = new DataAccess(dbConnection);
 		topics = dataAccess.listTopics();
-		final Fetchmail fetchmail = new Fetchmail(dbConnection, config.getDatadir());
-		isRunning = true;
-		log.info("start loop");
-		while (isRunning) {
-			for (Topic topic : topics) {
-				final Topic loadedTopic = dataAccess.loadTopic(topic.getAddress());
-				fetchmail.fetchAll(loadedTopic);
-			}
-			sleep(1);
-		}
+		fetchmail = new Fetchmail(dbConnection, config.getDatadir());
+		setRunning(false);
 	}
 
 	public void sleep(int secs) {
@@ -50,30 +39,33 @@ public class Loop {
 
 	public void stop() throws IOException {
 		System.out.println("stop");
-		isRunning = false;
+		setRunning(false);
 		dataAccess = null;
 	}
 	
-	public static void main(String[] args) {
-		try {
-			Config conf = Config.load(Paths.get("conf/config.yaml"));
-			Database database = conf.getDatabase();
-			
-			String url = "jdbc:postgresql://" + database.getHost() + ":" + database.getPort() + "/" + database.getName();
-			final Properties props = new Properties();
-			props.setProperty("user", database.getUser());
-			props.setProperty("password", database.getPassword());
-			final Connection conn = DriverManager.getConnection(url, props);			
-			final Loop loop = new Loop(conf);
-			loop.start(conn);
-			while (loop.isRunning) {
-				Thread.sleep(500L);
+	public synchronized boolean isRunning() {
+		return running;
+	}
+
+	@Override
+	public void run() {
+		setRunning(true);
+		log.info("start loop");
+		while (isRunning()) {
+			try {
+				for (Topic topic : topics) {
+					final Topic loadedTopic = dataAccess.loadTopic(topic.getAddress());
+					fetchmail.fetchAll(loadedTopic);
+				}
+			} catch (CxException e) {
+				log.error(e);
 			}
-			conn.close();
-			log.info("bye");
-		} catch (IOException | CxException | SQLException | InterruptedException e) {
-			log.error(e);
+			sleep(1);
 		}
 	}
-	
+
+	public synchronized void setRunning(boolean running) {
+		this.running = running;
+	}
+
 }

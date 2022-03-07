@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+	<New id="jdbc/connecteam" class="org.eclipse.jetty.plus.jndi.Resource">
+		<Arg>jdbc/connecteam</Arg>
+		<Arg>
+			<New class="org.postgresql.ds.PGSimpleDataSource">
+				<Set name="ServerName">127.0.0.1</Set>
+				<Set name="PortNumber">5432</Set>
+				<Set name="DatabaseName">dbname</Set>
+				<Set name="User">dbuser</Set>
+				<Set name="Password">secret00</Set>
+			</New>
+		</Arg>
+	</New>
+</Configure>
