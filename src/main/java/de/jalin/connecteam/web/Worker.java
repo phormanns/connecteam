@@ -51,4 +51,5 @@ public class Worker implements ServletContextListener {
 		}
 		log.info("stop worker thread");
 	}
+
 }

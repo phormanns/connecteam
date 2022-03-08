@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -13,6 +12,8 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 public class Config {
 
+	private static Logger log = Logger.getLogger("Config.class");
+	
 	private Database database;
 	private DataDir datadir;
 	
@@ -46,6 +47,7 @@ public class Config {
 	}
 
 	public static Config load(Path configPath) throws IOException {
+		log.info("write config to " + configPath.toString());
 		final Constructor constructor = new Constructor(Config.class);
 		final Yaml yml = new Yaml(constructor);
 		return yml.load(new FileInputStream(configPath.toFile()));
