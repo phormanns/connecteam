@@ -47,7 +47,7 @@ public class Config {
 	}
 
 	public static Config load(Path configPath) throws IOException {
-		log.info("write config to " + configPath.toString());
+		log.info("load config from " + configPath.toString());
 		final Constructor constructor = new Constructor(Config.class);
 		final Yaml yml = new Yaml(constructor);
 		return yml.load(new FileInputStream(configPath.toFile()));

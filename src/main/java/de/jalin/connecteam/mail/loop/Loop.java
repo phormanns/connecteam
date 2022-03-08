@@ -27,6 +27,7 @@ public class Loop implements Runnable {
 	}
 	
 	public void init(final Connection dbConnection) throws CxException {
+		log.info("init loop");
 		dataAccess = new DataAccess(dbConnection);
 		topics = dataAccess.listTopics();
 		fetchmail = new Fetchmail(dbConnection, config.getDatadir());
