@@ -29,7 +29,8 @@ public class Worker implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent initializedEvent) {
 		log.info("start worker thread");
 		try {
-			final Config conf = Config.load(Paths.get("./conf/config.yaml"));
+			final String userDir = System.getProperty("user.dir");
+			final Config conf = Config.load(Paths.get(userDir, "conf/config.yaml"));
 			loop = new Loop(conf);
 			dbConnection = dataSource.getConnection();
 			loop.init(dbConnection);

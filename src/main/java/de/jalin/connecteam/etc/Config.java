@@ -51,15 +51,4 @@ public class Config {
 		return yml.load(new FileInputStream(configPath.toFile()));
 	}
 
-	public static void main(String[] args) {
-		final Path sampleConfigPath = Paths.get("./conf/config.yaml");
-		final Path tempConfigPath = Paths.get("./conf/config.temp.yaml");
-		try {
-			final Config config = Config.load(sampleConfigPath);
-			config.dump(tempConfigPath);
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
 }

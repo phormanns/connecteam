@@ -39,7 +39,8 @@ public class AttachmentServlet extends HttpServlet {
 	public void init() throws ServletException {
 		super.init();
 		try {
-			final Config conf = Config.load(Paths.get("./conf/config.yaml"));
+			final String userDir = System.getProperty("user.dir");
+			final Config conf = Config.load(Paths.get(userDir, "conf/config.yaml"));
 			datadir = conf.getDatadir();
 		} catch (IOException e) {
 			new ServletException(e);
