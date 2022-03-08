@@ -1,6 +1,7 @@
 package de.jalin.connecteam.etc;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,19 +39,32 @@ public class Config {
 		this.datadir = datadir;
 	}
 
-	public void dump(Path configPath) throws IOException {
+	public void dump(Path configPath) throws CxException {
 		final DumperOptions options = new DumperOptions();
 		options.setDefaultFlowStyle(FlowStyle.BLOCK);
 		options.setPrettyFlow(true);        
 		final Yaml yml = new Yaml(options);
-		yml.dump(this, new FileWriter(configPath.toFile()));
+		try {
+			yml.dump(this, new FileWriter(configPath.toFile()));
+		} catch (IOException e) {
+			log.error(e);
+			throw new CxException(e);
+		}
 	}
 
-	public static Config load(Path configPath) throws IOException {
+	public static Config load(Path configPath) throws CxException {
 		log.info("load config from " + configPath.toString());
 		final Constructor constructor = new Constructor(Config.class);
 		final Yaml yml = new Yaml(constructor);
-		return yml.load(new FileInputStream(configPath.toFile()));
+		Config config;
+		try {
+			config = yml.load(new FileInputStream(configPath.toFile()));
+		} catch (FileNotFoundException e) {
+			log.error(e);
+			throw new CxException(e);
+		}
+		log.info("config successfully loaded");
+		return config;
 	}
 
 }

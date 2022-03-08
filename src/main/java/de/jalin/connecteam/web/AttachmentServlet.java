@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 
 import de.jalin.connecteam.data.DataAccess;
 import de.jalin.connecteam.etc.Config;
+import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.DataDir;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.mail.message.AttachmentPath;
@@ -42,7 +43,7 @@ public class AttachmentServlet extends HttpServlet {
 			final String userDir = System.getProperty("user.dir");
 			final Config conf = Config.load(Paths.get(userDir, "conf/config.yaml"));
 			datadir = conf.getDatadir();
-		} catch (IOException e) {
+		} catch (CxException e) {
 			new ServletException(e);
 		}
 

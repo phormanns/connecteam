@@ -1,6 +1,5 @@
 package de.jalin.connecteam.web;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,7 +36,7 @@ public class Worker implements ServletContextListener {
 			loop.init(dbConnection);
 			final Thread thread = new Thread(loop);
 			thread.start();
-		} catch (IOException | CxException | SQLException e) {
+		} catch (CxException | SQLException e) {
 			log.error(e);
 		}
 	}
