@@ -31,6 +31,9 @@ public class Worker implements ServletContextListener {
 			final String userDir = System.getProperty("user.dir");
 			final Config conf = Config.load(Paths.get(userDir, "conf/config.yaml"));
 			loop = new Loop(conf);
+			if (dataSource == null) {
+				log.error("no datasource configured");
+			}
 			log.info("datasource " + dataSource.toString());
 			dbConnection = dataSource.getConnection();
 			loop.init(dbConnection);
