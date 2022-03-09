@@ -6,7 +6,7 @@ import java.util.Map;
 
 import de.jalin.connecteam.etc.RandomIdent;
 
-public class MailinglistMessage {
+public class Post {
 
 	private final String random;
 	private String subject;
@@ -17,7 +17,7 @@ public class MailinglistMessage {
 	private Map<String, AttachmentPath> attachments;
 	
 	
-	public MailinglistMessage() {
+	public Post() {
 		final RandomIdent randomIdent = new RandomIdent();
 		random = randomIdent.nextIdent();
 		attachments = new HashMap<>();

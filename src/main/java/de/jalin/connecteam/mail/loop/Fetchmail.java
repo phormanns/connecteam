@@ -10,7 +10,7 @@ import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.DataDir;
 import de.jalin.connecteam.etc.Logger;
-import de.jalin.connecteam.mail.message.MailinglistMessage;
+import de.jalin.connecteam.mail.message.Post;
 import de.jalin.connecteam.mail.message.MessageClassifier;
 import de.jalin.connecteam.mail.message.MessageParser;
 import jakarta.mail.Flags.Flag;
@@ -27,7 +27,7 @@ public class Fetchmail {
 	private final Connection dbConnection;
 	private final DataDir datadir;
 	
-	private List<MailinglistMessage> sendQueue = null;
+	private List<Post> sendQueue = null;
 
 	public Fetchmail(final Connection dbConnection, final DataDir datadir) {
 		this.dbConnection = dbConnection;
@@ -54,13 +54,13 @@ public class Fetchmail {
 							Message message = child.getMessage(idx);
 							boolean isSeen = message.isSet(Flag.SEEN);
 							if (!isSeen) {
-								final MailinglistMessage mlMessage = messageParser.parse(message);
-								final MessageClassifier messageClassifier = new MessageClassifier(topic, mlMessage);
+								final Post listPost = messageParser.parse(message);
+								final MessageClassifier messageClassifier = new MessageClassifier(topic, listPost);
 								if (messageClassifier.isAccepted()) { 
-									dataAccess.storeMessage(mlMessage, topic.getId());
-									sendQueue.add(mlMessage);
+									dataAccess.storeMessage(listPost, topic.getId());
+									sendQueue.add(listPost);
 								} else {
-									log.info("message from " + mlMessage.getOriginalFrom() + " rejected.");
+									log.info("message from " + listPost.getOriginalFrom() + " rejected.");
 								}
 								message.setFlag(Flag.SEEN, true);
 							}

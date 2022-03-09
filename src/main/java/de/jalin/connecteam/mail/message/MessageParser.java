@@ -36,14 +36,14 @@ public class MessageParser {
 		this.datadir = datadir;
 	}
 
-	public MailinglistMessage parse(Message message) throws CxException {
-		final MailinglistMessage email = new MailinglistMessage();
+	public Post parse(Message message) throws CxException {
+		final Post mlPost = new Post();
 		if (message instanceof MimeMessage) {
 			final MimeMessageParser parser = new MimeMessageParser((MimeMessage) message);
 			try {
 				parser.parse();
-				email.setSubject(parser.getSubject());
-				email.setTextContent(parser.getPlainContent());
+				mlPost.setSubject(parser.getSubject());
+				mlPost.setTextContent(parser.getPlainContent());
 				final String htmlContent = parser.getHtmlContent();
 				if (htmlContent != null && !htmlContent.isEmpty()) {
 					final Document dirty = Jsoup.parse(htmlContent);
@@ -51,16 +51,16 @@ public class MessageParser {
 			        final Document clean = cleaner.clean(dirty);
 			        final Html2PlainText html2PlainText = new Html2PlainText();
 			        final String plainText = html2PlainText.getPlainText(clean);
-			        email.setTextContent(plainText);
+			        mlPost.setTextContent(plainText);
 				}
 				final String listAddress = mailinglist.getAddress();
 				String from = parser.getFrom();
-				email.setOriginalFrom(from);
-				email.setFromAddress(patchSenderAddress(from, listAddress));
-				email.setToAddress(mailinglist.getName() + " <" + listAddress + ">");
+				mlPost.setOriginalFrom(from);
+				mlPost.setFromAddress(patchSenderAddress(from, listAddress));
+				mlPost.setToAddress(mailinglist.getName() + " <" + listAddress + ">");
 				final List<DataSource> attachmentList = parser.getAttachmentList();
 				if (attachmentList != null && !attachmentList.isEmpty()) {
-					final String directoryName = datadir.getPath() + "/" + email.getRandom();
+					final String directoryName = datadir.getPath() + "/" + mlPost.getRandom();
 					final File directory = new File(directoryName);
 					directory.mkdirs();
 					for (final DataSource dataSource : attachmentList) {
@@ -74,18 +74,18 @@ public class MessageParser {
 						attachmentPath.setContentType(contentType);
 						attachmentPath.setName(attachmentName);
 						attachmentPath.setFilename(attachmentFilename);
-						email.attach(attachmentPath);
+						mlPost.attach(attachmentPath);
 					}
 				}
-				log.info("Subject: " + email.getSubject());
-				log.info("From: " + email.getFromAddress());
-				log.info("To: " + email.getToAddress());
+				log.info("Subject: " + mlPost.getSubject());
+				log.info("From: " + mlPost.getFromAddress());
+				log.info("To: " + mlPost.getToAddress());
 			} catch (Exception e) {
 				log.error(e);
 				throw new CxException(e);
 			}
 		}
-		return email;
+		return mlPost;
 	}
 
 	public String patchSenderAddress(String senderAddress, String mlAddress) {

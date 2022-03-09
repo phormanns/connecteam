@@ -7,16 +7,16 @@ import de.jalin.connecteam.data.Topic;
 
 public class MessageClassifier {
 
-	private final MailinglistMessage message;
+	private final Post mlPost;
 	private final Topic topic;
 
-	public MessageClassifier(final Topic topic, final MailinglistMessage msg) {
+	public MessageClassifier(final Topic topic, final Post msg) {
 		this.topic = topic;
-		this.message = msg;
+		this.mlPost = msg;
 	}
 	
 	public boolean isRejected() {
-		final String originalFrom = message.getOriginalFrom();
+		final String originalFrom = mlPost.getOriginalFrom();
 		final Iterator<Subscription> subsIterator = topic.getSubscriptions().iterator();
 		while (subsIterator.hasNext()) {
 			final Subscription subscription = subsIterator.next();
@@ -31,7 +31,7 @@ public class MessageClassifier {
 	}
 	
 	public boolean isAccepted() {
-		final String originalFrom = message.getOriginalFrom();
+		final String originalFrom = mlPost.getOriginalFrom();
 		final Iterator<Subscription> subsIterator = topic.getSubscriptions().iterator();
 		while (subsIterator.hasNext()) {
 			final Subscription subscription = subsIterator.next();

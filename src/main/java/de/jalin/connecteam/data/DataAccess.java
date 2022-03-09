@@ -17,7 +17,7 @@ import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.mail.MailAccount;
 import de.jalin.connecteam.mail.message.AttachmentPath;
-import de.jalin.connecteam.mail.message.MailinglistMessage;
+import de.jalin.connecteam.mail.message.Post;
 
 public class DataAccess {
 
@@ -41,7 +41,10 @@ public class DataAccess {
 	
 	private static final String SELECT_SUBSCRIPTIONS = 
 			  "SELECT scr.id AS scr_id, scr.address AS scr_address, scr.name AS scr_name,"
-			+ " scn.id AS scn_id, scn.digest AS digest, scn.moderator AS moderator, scn.subscribe_date AS subscribe_date, scn.unsubscribe_date AS unsubscribe_date "
+			+ " scn.id AS scn_id,"
+			+ " scn.recieves_digest AS recieves_digest, scn.recieves_messages AS recieves_messages,"
+			+ " scn.recieves_messages AS recieves_messages, scn.may_send_messages AS may_send_messages, "
+			+ " scn.subscribe_date AS subscribe_date, scn.unsubscribe_date AS unsubscribe_date "
 			+ "FROM subscriber scr, subscription scn "
 			+ "WHERE scr.id = scn.subscriber_id AND scn.topic_id = ? ";
 	
@@ -91,8 +94,8 @@ public class DataAccess {
 		return null;
 	}
 	
-	public void storeMessage(final MailinglistMessage msg, final long topicId) {
-		log.info("store message from " + msg.getOriginalFrom());
+	public void storeMessage(final Post post, final long topicId) {
+		log.info("store message from " + post.getOriginalFrom());
 		PreparedStatement stmtInsertMessage = null;
 		PreparedStatement stmtInsertAttachment = null;
 		PreparedStatement stmtLastVal = null;
@@ -101,12 +104,12 @@ public class DataAccess {
 			dbConnection.setAutoCommit(false);
 			stmtInsertMessage = dbConnection.prepareStatement(INSERT_MESSAGE);
 			stmtInsertMessage.setLong(1, topicId);
-			stmtInsertMessage.setString(2, msg.getSubject());
-			stmtInsertMessage.setString(3, msg.getOriginalFrom());
-			stmtInsertMessage.setString(4, msg.getTextContent());
-			stmtInsertMessage.setString(5, msg.getRandom());
+			stmtInsertMessage.setString(2, post.getSubject());
+			stmtInsertMessage.setString(3, post.getOriginalFrom());
+			stmtInsertMessage.setString(4, post.getTextContent());
+			stmtInsertMessage.setString(5, post.getRandom());
 			stmtInsertMessage.execute();
-			final Collection<AttachmentPath> attachments = msg.getAttachments();
+			final Collection<AttachmentPath> attachments = post.getAttachments();
 			if (attachments != null && !attachments.isEmpty()) {
 				stmtLastVal = dbConnection.prepareStatement(LAST_VAL);
 				resLastVal = stmtLastVal.executeQuery();
@@ -236,8 +239,10 @@ public class DataAccess {
 				final Subscription scn = new Subscription();
 				scn.setSubscriber(scr);
 				scn.setId(rsSubs.getLong("scn_id"));
-				scn.setDigest(rsSubs.getBoolean("digest"));
-				scn.setModerator(rsSubs.getBoolean("moderator"));
+				scn.setRecievesDigest(rsSubs.getBoolean("recieves_digest"));
+				scn.setRecievesMessages(rsSubs.getBoolean("recieves_messages"));
+				scn.setRecievesModeration(rsSubs.getBoolean("recieves_moderation"));
+				scn.setMaySendMessages(rsSubs.getBoolean("may_send_messages"));
 				scn.setSubscribeDate(convertToLocalDateTime(rsSubs.getDate("subscribe_date")));
 				final Date unsubscribeDate = rsSubs.getDate("unsubscribe_date");
 				if (unsubscribeDate == null) {

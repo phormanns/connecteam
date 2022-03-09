@@ -23,7 +23,7 @@ import de.jalin.connecteam.etc.Logger;
 import de.jalin.connecteam.etc.RandomIdent;
 import de.jalin.connecteam.mail.MailAccount;
 import de.jalin.connecteam.mail.message.AttachmentPath;
-import de.jalin.connecteam.mail.message.MailinglistMessage;
+import de.jalin.connecteam.mail.message.Post;
 
 public class Sendmail {
 
@@ -37,14 +37,14 @@ public class Sendmail {
 	    this.random = new RandomIdent();
 	}
 	
-	public void send(final MailinglistMessage msg) {
+	public void send(final Post listPost) {
 		topic.getSubscriptions().forEach(new Consumer<Subscription>() {
 			@Override
 			public void accept(final Subscription subscription) {
 				if (subscription.isActive()) {
 					final String subscriberAddress = subscription.getSubscriber().getAddress();
 					try {
-						smtpSend(msg, subscriberAddress);
+						smtpSend(listPost, subscriberAddress);
 					} catch (CxException e) {
 						log.error(e);
 					}
@@ -53,23 +53,22 @@ public class Sendmail {
 		});
 	}
 
-	public void sendAll(final List<MailinglistMessage> sendQueue) {
-		sendQueue.forEach(new Consumer<MailinglistMessage>() {
+	public void sendAll(final List<Post> sendQueue) {
+		sendQueue.forEach(new Consumer<Post>() {
 			@Override
-			public void accept(MailinglistMessage msg) {
-				send(msg);
+			public void accept(Post mlPost) {
+				send(mlPost);
 			}
 		});
-	
 	}
 
-	private void smtpSend(final MailinglistMessage msg, final String toAddress) throws CxException {
+	private void smtpSend(final Post mlPost, final String toAddress) throws CxException {
         try {
         	log.info("sending to " + toAddress);
     		final String topicAddress = topic.getAddress();
-    		final String subject = msg.getSubject();
-    		final String content = msg.getTextContent();
-    		final String originalFrom = msg.getOriginalFrom();
+    		final String subject = mlPost.getSubject();
+    		final String content = mlPost.getTextContent();
+    		final String originalFrom = mlPost.getOriginalFrom();
 			final MailAccount smtpAccount = topic.getSmtpAccount();
 			final String smtpHost = smtpAccount.getHost();
 			final int smtpPort = smtpAccount.getPort();
@@ -111,14 +110,14 @@ public class Sendmail {
 			    printWriter.write("an den Verteiler " + topicAddress + "\n\n");
 			    printWriter.write(content);
 			    printWriter.write("\n\nAnlagen:\n");
-			    final Collection<AttachmentPath> attachments = msg.getAttachments();
+			    final Collection<AttachmentPath> attachments = mlPost.getAttachments();
 			    for (AttachmentPath att : attachments) {
 			    	String webDomain = topic.getWebDomain();
 			    	String webDomainWithProtocol = "https://" + topic.getWebDomain();
 			    	if (webDomain.startsWith("localhost:")) {
 			    		webDomainWithProtocol = "http://" + topic.getWebDomain();
 			    	}
-					printWriter.write(att.getName() + " " + webDomainWithProtocol + "/att/" + msg.getRandom() + "/" + att.getFilename() + "\n");
+					printWriter.write(att.getName() + " " + webDomainWithProtocol + "/att/" + mlPost.getRandom() + "/" + att.getFilename() + "\n");
 			    }
 			}
 			if (!client.completePendingCommand()) {

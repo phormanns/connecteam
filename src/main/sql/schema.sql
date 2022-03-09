@@ -35,8 +35,10 @@ CREATE TABLE subscription (
     id SERIAL PRIMARY KEY,
     subscriber_id integer NOT NULL,
     topic_id integer NOT NULL,
-    digest boolean NOT NULL,
-    moderator boolean NOT NULL,
+    recieves_digest boolean NOT NULL,
+    recieves_messages boolean NOT NULL,
+    recieves_moderation boolean NOT NULL,
+    may_send_messages boolean NOT NULL,
     subscribe_date TIMESTAMP,
     unsubscribe_date TIMESTAMP,
     CONSTRAINT fk_subscriber

@@ -9,8 +9,10 @@ public class Subscription {
 	private long id;
 	private LocalDateTime subscribeDate;
 	private LocalDateTime unsubscribeDate;
-	private boolean digest = false;
-	private boolean moderator = false;
+	private boolean recievesDigest = false;
+	private boolean recievesMessages = false;
+	private boolean recievesModeration = false;
+	private boolean maySendMessages = false;
 	private boolean active = false;
 
 	public Topic getTopic() {
@@ -57,20 +59,36 @@ public class Subscription {
 		active = now.isBefore(unsubscribeDate) && subscribeDate != null && subscribeDate.isBefore(now);
 	}
 
-	public boolean isDigest() {
-		return digest;
+	public boolean recievesDigest() {
+		return recievesDigest;
 	}
 
-	public void setDigest(boolean digest) {
-		this.digest = digest;
+	public void setRecievesDigest(boolean recievesDigest) {
+		this.recievesDigest = recievesDigest;
 	}
 
-	public boolean isModerator() {
-		return moderator;
+	public boolean recievesMessages() {
+		return recievesMessages;
 	}
 
-	public void setModerator(boolean moderator) {
-		this.moderator = moderator;
+	public void setRecievesMessages(boolean recievesMessages) {
+		this.recievesMessages = recievesMessages;
+	}
+
+	public boolean recievesModeration() {
+		return recievesModeration;
+	}
+
+	public void setRecievesModeration(boolean recievesModeration) {
+		this.recievesModeration = recievesModeration;
+	}
+
+	public boolean maySendMessages() {
+		return maySendMessages;
+	}
+
+	public void setMaySendMessages(boolean maySendMessages) {
+		this.maySendMessages = maySendMessages;
 	}
 
 	public boolean isActive() {
