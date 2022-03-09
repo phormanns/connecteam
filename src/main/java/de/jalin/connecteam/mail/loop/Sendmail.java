@@ -113,7 +113,12 @@ public class Sendmail {
 			    printWriter.write("\n\nAnlagen:\n");
 			    final Collection<AttachmentPath> attachments = msg.getAttachments();
 			    for (AttachmentPath att : attachments) {
-			    	printWriter.write(att.getName() + " http://localhost:8080/att/" + msg.getRandom() + "/" + att.getFilename() + "\n");
+			    	String webDomain = topic.getWebDomain();
+			    	String webDomainWithProtocol = "https://" + topic.getWebDomain();
+			    	if (webDomain.startsWith("localhost:")) {
+			    		webDomainWithProtocol = "http://" + topic.getWebDomain();
+			    	}
+					printWriter.write(att.getName() + " " + webDomainWithProtocol + "/att/" + msg.getRandom() + "/" + att.getFilename() + "\n");
 			    }
 			}
 			if (!client.completePendingCommand()) {

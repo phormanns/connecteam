@@ -25,14 +25,14 @@ public class DataAccess {
 	
 	private static final String LIST_SPACES = 
 			  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc,"
-			+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.address AS tp_address,"
+			+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.web_domain AS tp_webdomain, tp.address AS tp_address,"
 			+ " tp.imap_host AS imap_host, tp.imap_port AS imap_port, tp.imap_starttls AS imap_starttls, tp.imap_login AS imap_login, tp.imap_passwd AS imap_passwd,"
 			+ " tp.smtp_host AS smtp_host, tp.smtp_port AS smtp_port, tp.smtp_starttls AS smtp_starttls, tp.smtp_login AS smtp_login, tp.smtp_passwd AS smtp_passwd "
 			+ "FROM workspace ws, topic tp "
 			+ "WHERE tp.workspace_id = ws.id ORDER BY tp.id";
 
 	private static final String SELECT_TOPIC = 
-			  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc,"
+			  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc, tp.web_domain AS tp_webdomain,"
 			+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.address AS tp_address,"
 			+ " tp.imap_host AS imap_host, tp.imap_port AS imap_port, tp.imap_starttls AS imap_starttls, tp.imap_login AS imap_login, tp.imap_passwd AS imap_passwd,"
 			+ " tp.smtp_host AS smtp_host, tp.smtp_port AS smtp_port, tp.smtp_starttls AS smtp_starttls, tp.smtp_login AS smtp_login, tp.smtp_passwd AS smtp_passwd "
@@ -157,6 +157,7 @@ public class DataAccess {
 				topic.setId(topicId);
 				topic.setName(rsTopic.getString("tp_name"));
 				topic.setDescription(rsTopic.getString("tp_desc"));
+				topic.setWebDomain(rsTopic.getString("tp_webdomain"));
 				topic.setAddress(rsTopic.getString("tp_address"));
 				final MailAccount imapAccount = new MailAccount();
 				imapAccount.setHost(rsTopic.getString("imap_host"));
@@ -205,6 +206,7 @@ public class DataAccess {
 				topic.setId(rsTopic.getLong("tp_id"));
 				topic.setName(rsTopic.getString("tp_name"));
 				topic.setDescription(rsTopic.getString("tp_desc"));
+				topic.setWebDomain(rsTopic.getString("tp_webdomain"));
 				topic.setAddress(rsTopic.getString("tp_address"));
 				final MailAccount imapAccount = new MailAccount();
 				imapAccount.setHost(rsTopic.getString("imap_host"));

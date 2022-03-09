@@ -10,6 +10,7 @@ CREATE TABLE topic (
     address character varying(96) NOT NULL,
     name character varying(96) NOT NULL,
     description text,
+    web_domain character varying(96) NOT NULL,
     imap_host character varying(96) NOT NULL,
     imap_port integer NOT NULL,
     imap_starttls boolean NOT NULL,

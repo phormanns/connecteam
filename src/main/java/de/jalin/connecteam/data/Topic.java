@@ -13,6 +13,7 @@ public class Topic {
 	private String address;
 	private String name;
 	private String description;
+	private String webDomain;
 	private final Map<String,Subscription> subscriptions;
 	private MailAccount imapAccount;
 	private MailAccount smtpAccount;
@@ -61,6 +62,14 @@ public class Topic {
 		this.description = description;
 	}
 	
+	public String getWebDomain() {
+		return webDomain;
+	}
+
+	public void setWebDomain(String webDomain) {
+		this.webDomain = webDomain;
+	}
+
 	public void add(Subscription subscription) {
 		subscriptions.put(subscription.getSubscriber().getAddress(), subscription);
 	}
