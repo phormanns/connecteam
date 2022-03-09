@@ -43,7 +43,7 @@ public class DataAccess {
 			  "SELECT scr.id AS scr_id, scr.address AS scr_address, scr.name AS scr_name,"
 			+ " scn.id AS scn_id,"
 			+ " scn.recieves_digest AS recieves_digest, scn.recieves_messages AS recieves_messages,"
-			+ " scn.recieves_messages AS recieves_messages, scn.may_send_messages AS may_send_messages, "
+			+ " scn.recieves_moderation AS recieves_moderation, scn.may_send_messages AS may_send_messages, "
 			+ " scn.subscribe_date AS subscribe_date, scn.unsubscribe_date AS unsubscribe_date "
 			+ "FROM subscriber scr, subscription scn "
 			+ "WHERE scr.id = scn.subscriber_id AND scn.topic_id = ? ";
