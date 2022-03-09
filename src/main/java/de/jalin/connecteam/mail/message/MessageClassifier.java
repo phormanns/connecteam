@@ -15,21 +15,6 @@ public class MessageClassifier {
 		this.mlPost = msg;
 	}
 	
-	public boolean isRejected() {
-		final String originalFrom = mlPost.getOriginalFrom();
-		final Iterator<Subscription> subsIterator = topic.getSubscriptions().iterator();
-		while (subsIterator.hasNext()) {
-			final Subscription subscription = subsIterator.next();
-			if (subscription.isActive()) {
-				final String subscriberAddress = subscription.getSubscriber().getAddress();
-				if (subscriberAddress.equals(originalFrom)) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	
 	public boolean isAccepted() {
 		final String originalFrom = mlPost.getOriginalFrom();
 		final Iterator<Subscription> subsIterator = topic.getSubscriptions().iterator();
@@ -38,7 +23,7 @@ public class MessageClassifier {
 			if (subscription.isActive()) {
 				final String subscriberAddress = subscription.getSubscriber().getAddress();
 				if (subscriberAddress.equals(originalFrom)) {
-					return true;
+					return subscription.maySendMessages();
 				}
 			}
 		}

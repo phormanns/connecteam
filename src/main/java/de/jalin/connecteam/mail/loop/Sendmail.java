@@ -41,7 +41,7 @@ public class Sendmail {
 		topic.getSubscriptions().forEach(new Consumer<Subscription>() {
 			@Override
 			public void accept(final Subscription subscription) {
-				if (subscription.isActive()) {
+				if (subscription.isActive() && subscription.recievesMessages()) {
 					final String subscriberAddress = subscription.getSubscriber().getAddress();
 					try {
 						smtpSend(listPost, subscriberAddress);
