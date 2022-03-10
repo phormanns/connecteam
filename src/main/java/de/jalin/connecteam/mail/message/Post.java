@@ -1,5 +1,6 @@
 package de.jalin.connecteam.mail.message;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,9 @@ public class Post {
 	private String originalFrom;
 	private String toAddress;
 	private String textContent;
+	private LocalDateTime processingTime;
 	private int status;
+	private LocalDateTime statusUpdateTime;
 	private Map<String, AttachmentPath> attachments;
 	
 	
@@ -73,12 +76,28 @@ public class Post {
 		this.textContent = textContent;
 	}
 
+	public LocalDateTime getProcessingTime() {
+		return processingTime;
+	}
+
+	public void setProcessingTime(LocalDateTime processingTime) {
+		this.processingTime = processingTime;
+	}
+
 	public int getStatus() {
 		return status;
 	}
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public LocalDateTime getStatusUpdateTime() {
+		return statusUpdateTime;
+	}
+
+	public void setStatusUpdateTime(LocalDateTime statusUpdateTime) {
+		this.statusUpdateTime = statusUpdateTime;
 	}
 
 	public void attach(AttachmentPath attachment) {

@@ -65,6 +65,8 @@ CREATE TABLE message (
     sender character varying(96) NOT NULL,
     message text NOT NULL,
     token character varying(96) NOT NULL,
+    status integer NOT NULL,
+    update_time TIMESTAMP NOT NULL,
     CONSTRAINT fk_topic_msg
       FOREIGN KEY(topic_id) REFERENCES topic(id)
 );
@@ -72,13 +74,22 @@ CREATE TABLE message (
 CREATE UNIQUE INDEX message_token_idx
 	ON message(token);
 
+CREATE TABLE message_status (
+    id SERIAL PRIMARY KEY,
+    message_id integer NOT NULL,
+    status integer NOT NULL,
+    update_time TIMESTAMP NOT NULL,
+    CONSTRAINT fk_message_upd
+      FOREIGN KEY(message_id) REFERENCES message(id)
+);
+
 CREATE TABLE attachment (
     id SERIAL PRIMARY KEY,
     message_id integer NOT NULL,
     filename character varying(96) NOT NULL,
     mime_type character varying(96) NOT NULL,
     path_token character varying(96) NOT NULL,
-    CONSTRAINT fk_message
+    CONSTRAINT fk_message_att
       FOREIGN KEY(message_id) REFERENCES message(id)
 );
 

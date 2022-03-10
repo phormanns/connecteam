@@ -61,6 +61,12 @@ public class DataAccess {
 			+ " FROM message msg, attachment att"
 			+ " WHERE att.message_id = msg.id AND msg.token = ? AND att.path_token = ?";
 
+	private static final String SELECT_MESSAGE = 
+			  "SELECT msg.id AS id, msg.subject AS subject, msg.processing AS processing, msg.sender AS sender,"
+			+ " msg.message AS message, msg.status AS status, msg.update_time AS update_time, tp.address AS tp_address "
+			+ " FROM message msg, topic tp"
+			+ " WHERE tp.id = msg.topic_id AND msg.token = ?";
+
 	private static final String LAST_VAL =
 			  "SELECT LASTVAL() AS last_id";
 	
@@ -94,7 +100,7 @@ public class DataAccess {
 		return null;
 	}
 	
-	public void storeMessage(final Post post, final long topicId) {
+	public void storeMessage(final Post post, final long topicId) throws CxException {
 		log.info("store message from " + post.getOriginalFrom());
 		PreparedStatement stmtInsertMessage = null;
 		PreparedStatement stmtInsertAttachment = null;
@@ -127,8 +133,8 @@ public class DataAccess {
 			dbConnection.commit();
 			dbConnection.setAutoCommit(true);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
+			throw new CxException(e);
 		}
 	}
 	
@@ -273,7 +279,36 @@ public class DataAccess {
 		return localDateTime;
 	}
 
-	public Post loadMessage(String messageId) {
+	public Post loadMessage(final String messageToken) throws CxException {
+		log.info("load message " + messageToken);
+		PreparedStatement stmtSelectMsg = null;
+		ResultSet rsMsg = null;
+		try {
+			stmtSelectMsg = dbConnection.prepareStatement(SELECT_MESSAGE);
+			stmtSelectMsg.setString(1, messageToken);
+			rsMsg = stmtSelectMsg.executeQuery();
+			if (rsMsg.next()) {
+				final Post post = new Post();
+				final String topicAddress = rsMsg.getString("tp_address");
+				post.setFromAddress(topicAddress);
+				post.setOriginalFrom(rsMsg.getString("sender"));
+				final Date processing = rsMsg.getDate("processing");
+				post.setProcessingTime(convertToLocalDateTime(processing));
+				post.setStatus(rsMsg.getInt("status"));
+				final Date updateTime = rsMsg.getDate("update_time");
+				post.setStatusUpdateTime(convertToLocalDateTime(updateTime));
+				post.setSubject(rsMsg.getString("subject"));
+				post.setTextContent(rsMsg.getString("message"));
+				post.setToAddress(topicAddress);
+				return post;
+			}
+		} catch (SQLException e) {
+			log.error(e);
+			throw new CxException(e);
+		} finally {
+			if (rsMsg != null) try { rsMsg.close(); } catch (Exception e) { };
+			if (stmtSelectMsg != null) try { stmtSelectMsg.close(); } catch (Exception e) { };
+		}
 		return null;
 	}
 	
