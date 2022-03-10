@@ -42,19 +42,36 @@ public class Sendmail {
 	}
 	
 	public void sendPost(final Post listPost) {
-		topic.getSubscriptions().forEach(new Consumer<Subscription>() {
-			@Override
-			public void accept(final Subscription subscription) {
-				if (subscription.isActive() && subscription.recievesMessages()) {
-					final String subscriberAddress = subscription.getSubscriber().getAddress();
-					try {
-						smtpSend(listPost, subscriberAddress);
-					} catch (CxException e) {
-						log.error(e);
+		if (Post.POST_ACCEPTED == listPost.getStatus()) {
+			topic.getSubscriptions().forEach(new Consumer<Subscription>() {
+				@Override
+				public void accept(final Subscription subscription) {
+					if (subscription.isActive() && subscription.recievesMessages()) {
+						final String subscriberAddress = subscription.getSubscriber().getAddress();
+						try {
+							smtpSend(listPost, subscriberAddress, false);
+						} catch (CxException e) {
+							log.error(e);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
+		if (Post.POST_NEEDS_APPROVAL == listPost.getStatus()) {
+			topic.getSubscriptions().forEach(new Consumer<Subscription>() {
+				@Override
+				public void accept(final Subscription subscription) {
+					if (subscription.isActive() && subscription.recievesModeration()) {
+						final String subscriberAddress = subscription.getSubscriber().getAddress();
+						try {
+							smtpSend(listPost, subscriberAddress, true);
+						} catch (CxException e) {
+							log.error(e);
+						}
+					}
+				}
+			});
+		}
 	}
 
 	public void sendAll(final List<Post> sendQueue) {
@@ -66,7 +83,7 @@ public class Sendmail {
 		});
 	}
 
-	private void smtpSend(final Post mlPost, final String toAddress) throws CxException {
+	private void smtpSend(final Post mlPost, final String toAddress, final boolean needsApproval) throws CxException {
         try {
         	log.info("sending to " + toAddress);
     		final String fromAddress = topic.getAddress();
@@ -82,7 +99,11 @@ public class Sendmail {
 			try (final PrintWriter printWriter = new PrintWriter(messageWriter)) {
 			    printWriter.write(makeSMTPHeaders(fromAddress, toAddress, subject));
 			    
-			    printWriter.write(makeTopicInfo(fromAddress, originalFrom));
+			    if (needsApproval) {
+				    printWriter.write(makeApprovalInfo(fromAddress, originalFrom, mlPost));
+			    } else {
+				    printWriter.write(makeTopicInfo(fromAddress, originalFrom));
+			    }
 			    printWriter.write(content);
 			    printWriter.write(makeAttachmentsList(mlPost));
 			}
@@ -95,6 +116,15 @@ public class Sendmail {
 			throw new CxException(e);
 		}
     }
+
+	public String makeApprovalInfo(final String fromAddress, final String originalFrom, final Post mlPost) {
+		final StringBuffer messageInfo = new StringBuffer("Nachricht von " + originalFrom + "\n");
+		messageInfo.append("an den Verteiler " + fromAddress + "\n");
+		messageInfo.append("wartet auf Deine Freigabe:\n");
+		messageInfo.append(buildWebdomainPart() + "/mod/" + mlPost.getRandom() + " \n\n");
+		final String info = messageInfo.toString();
+		return info;
+	}
 
 	public String makeTopicInfo(final String fromAddress, final String originalFrom) {
 		final StringBuffer messageInfo = new StringBuffer("Nachricht von " + originalFrom + "\n");
@@ -141,14 +171,18 @@ public class Sendmail {
 		writer.write("\n\nAnlagen:\n");
 		final Collection<AttachmentPath> attachments = mlPost.getAttachments();
 		for (AttachmentPath att : attachments) {
-			String webDomain = topic.getWebDomain();
-			String webDomainWithProtocol = "https://" + webDomain;
-			if (webDomain.startsWith("localhost:")) {
-				webDomainWithProtocol = "http://" + webDomain;
-			}
-			writer.write(att.getName() + " " + webDomainWithProtocol + "/att/" + mlPost.getRandom() + "/" + att.getFilename() + "\n");
+			writer.write(att.getName() + " " + buildWebdomainPart() + "/att/" + mlPost.getRandom() + "/" + att.getFilename() + "\n");
 		}
 		return writer.toString();
+	}
+
+	private String buildWebdomainPart() {
+		String webDomain = topic.getWebDomain();
+		String webDomainWithProtocol = "https://" + webDomain;
+		if (webDomain.startsWith("localhost:")) {
+			webDomainWithProtocol = "http://" + webDomain;
+		}
+		return webDomainWithProtocol;
 	}
 
 	private String makeSMTPHeaders(final String fromAddress, final String toAddress, final String subject) {

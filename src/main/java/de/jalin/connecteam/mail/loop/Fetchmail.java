@@ -56,12 +56,14 @@ public class Fetchmail {
 							if (!isSeen) {
 								final Post listPost = messageParser.parse(message);
 								final MessageClassifier messageClassifier = new MessageClassifier(topic, listPost);
-								if (messageClassifier.isAccepted()) { 
-									dataAccess.storeMessage(listPost, topic.getId());
-									sendQueue.add(listPost);
+								if (messageClassifier.isAccepted()) {
+									listPost.setStatus(Post.POST_ACCEPTED);
 								} else {
+									listPost.setStatus(Post.POST_NEEDS_APPROVAL);
 									log.info("message from " + listPost.getOriginalFrom() + " rejected.");
 								}
+								dataAccess.storeMessage(listPost, topic.getId());
+								sendQueue.add(listPost);
 								message.setFlag(Flag.SEEN, true);
 							}
 						} catch (CxException e) {

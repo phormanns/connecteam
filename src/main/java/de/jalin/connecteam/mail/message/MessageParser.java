@@ -42,6 +42,7 @@ public class MessageParser {
 			final MimeMessageParser parser = new MimeMessageParser((MimeMessage) message);
 			try {
 				parser.parse();
+				mlPost.setStatus(Post.POST_ON_HOLD);
 				mlPost.setSubject(parser.getSubject());
 				mlPost.setTextContent(parser.getPlainContent());
 				final String htmlContent = parser.getHtmlContent();
