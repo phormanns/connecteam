@@ -272,5 +272,9 @@ public class DataAccess {
 		final LocalDateTime localDateTime = atZone.toLocalDateTime();
 		return localDateTime;
 	}
+
+	public Post loadMessage(String messageId) {
+		return null;
+	}
 	
 }

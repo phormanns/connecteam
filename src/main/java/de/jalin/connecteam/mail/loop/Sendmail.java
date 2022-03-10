@@ -42,7 +42,8 @@ public class Sendmail {
 	}
 	
 	public void sendPost(final Post listPost) {
-		if (Post.POST_ACCEPTED == listPost.getStatus()) {
+		final int status = listPost.getStatus();
+		if (Post.POST_ACCEPTED == status) {
 			topic.getSubscriptions().forEach(new Consumer<Subscription>() {
 				@Override
 				public void accept(final Subscription subscription) {
@@ -57,7 +58,7 @@ public class Sendmail {
 				}
 			});
 		}
-		if (Post.POST_NEEDS_APPROVAL == listPost.getStatus()) {
+		if (Post.POST_NEEDS_APPROVAL == status) {
 			topic.getSubscriptions().forEach(new Consumer<Subscription>() {
 				@Override
 				public void accept(final Subscription subscription) {
@@ -168,10 +169,13 @@ public class Sendmail {
 
 	private String makeAttachmentsList(final Post mlPost) {
 		final StringWriter writer = new StringWriter();
-		writer.write("\n\nAnlagen:\n");
+		writer.write("\n");
 		final Collection<AttachmentPath> attachments = mlPost.getAttachments();
-		for (AttachmentPath att : attachments) {
-			writer.write(att.getName() + " " + buildWebdomainPart() + "/att/" + mlPost.getRandom() + "/" + att.getFilename() + "\n");
+		if (!attachments.isEmpty()) {
+			writer.write("\nAnlagen:\n");
+			for (AttachmentPath att : attachments) {
+				writer.write(att.getName() + " " + buildWebdomainPart() + "/att/" + mlPost.getRandom() + "/" + att.getFilename() + "\n");
+			}
 		}
 		return writer.toString();
 	}

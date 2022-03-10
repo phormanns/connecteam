@@ -10,9 +10,17 @@
 	</listener>
 
 	<servlet>
+		<servlet-name>ApprovalServlet</servlet-name>
+		<servlet-class>de.jalin.connecteam.web.ApprovalServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>AttachmentServlet</servlet-name>
 		<servlet-class>de.jalin.connecteam.web.AttachmentServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>ApprovalServlet</servlet-name>
+		<url-pattern>/mod/*</url-pattern>
+	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>AttachmentServlet</servlet-name>
 		<url-pattern>/att/*</url-pattern>
