@@ -15,6 +15,12 @@ public class Subscription {
 	private boolean maySendMessages = false;
 	private boolean active = false;
 
+	public Subscription() {
+		id = 0L;
+		topic = null;
+		subscriber = null;
+	}
+	
 	public Topic getTopic() {
 		return topic;
 	}

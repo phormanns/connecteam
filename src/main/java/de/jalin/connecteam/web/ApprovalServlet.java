@@ -3,6 +3,7 @@ package de.jalin.connecteam.web;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
@@ -13,8 +14,12 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import de.jalin.connecteam.data.DataAccess;
+import de.jalin.connecteam.data.Subscriber;
+import de.jalin.connecteam.data.Subscription;
+import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.CxException;
 import de.jalin.connecteam.etc.Logger;
+import de.jalin.connecteam.mail.loop.Sendmail;
 import de.jalin.connecteam.mail.message.Post;
 
 public class ApprovalServlet extends HttpServlet {
@@ -79,8 +84,32 @@ public class ApprovalServlet extends HttpServlet {
 			
 			post.setStatus(approveMessage ? Post.POST_ACCEPTED : Post.POST_REJECTED);
 			dataAccess.updateMessageStatus(post);
+			
+			if (approveMessage) {
+				final Topic topic = dataAccess.loadTopic(post.getFromAddress());
+				final Sendmail sendmail = new Sendmail(topic);
+				sendmail.sendPost(post);
+			}
+			
 			if (senderMaySend) {
-				
+				final String senderAddress = post.getOriginalFrom();
+				Subscription senderSubscription = dataAccess.loadSubscription(post.getTopic().getId(), senderAddress);
+				if (senderSubscription != null) {
+					senderSubscription.setTopic(post.getTopic());
+					senderSubscription.setMaySendMessages(true);
+				} else {
+					senderSubscription = new Subscription();
+					senderSubscription.setMaySendMessages(true);
+					senderSubscription.setRecievesDigest(false);
+					senderSubscription.setRecievesMessages(false);
+					senderSubscription.setRecievesModeration(false);
+					senderSubscription.setSubscribeDate(LocalDateTime.now());
+					final Subscriber subscriber = new Subscriber();
+					subscriber.setAddress(senderAddress);
+					senderSubscription.setSubscriber(subscriber);
+					senderSubscription.setTopic(post.getTopic());
+				}
+				dataAccess.saveSubscription(senderSubscription);
 			}
 			
 			session.setAttribute("successmessage", approveMessage ? "Die Nachricht wurde freigegeben." : "Die Nachricht wurde zurückgewiesen.");

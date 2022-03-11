@@ -6,6 +6,10 @@ public class Subscriber {
 	private String address;
 	private String name;
 	
+	public Subscriber() {
+		id = 0L;
+	}
+	
 	public long getId() {
 		return id;
 	}

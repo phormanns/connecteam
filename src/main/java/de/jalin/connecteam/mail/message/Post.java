@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.jalin.connecteam.data.Topic;
 import de.jalin.connecteam.etc.RandomIdent;
 
 public class Post {
@@ -25,7 +26,7 @@ public class Post {
 	private int status;
 	private LocalDateTime statusUpdateTime;
 	private Map<String, AttachmentPath> attachments;
-	
+	private Topic topic;
 	
 	public Post() {
 		final RandomIdent randomIdent = new RandomIdent();
@@ -119,5 +120,13 @@ public class Post {
 	
 	public Collection<AttachmentPath> getAttachments() {
 		return attachments.values();
+	}
+
+	public Topic getTopic() {
+		return topic;
+	}
+
+	public void setTopic(Topic topic) {
+		this.topic = topic;
 	}
 }
