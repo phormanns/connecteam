@@ -62,7 +62,7 @@ public class DataAccess {
 			+ " WHERE att.message_id = msg.id AND msg.token = ? AND att.path_token = ?";
 
 	private static final String SELECT_MESSAGE = 
-			  "SELECT msg.id AS id, msg.subject AS subject, msg.processing AS processing, msg.sender AS sender,"
+			  "SELECT msg.id AS id, msg.subject AS subject, msg.processing AS processing, msg.sender AS sender, msg.token AS token,"
 			+ " msg.message AS message, msg.status AS status, msg.update_time AS update_time, tp.address AS tp_address "
 			+ " FROM message msg, topic tp"
 			+ " WHERE tp.id = msg.topic_id AND msg.token = ?";
@@ -271,14 +271,6 @@ public class DataAccess {
 		}
 	}
 
-	private LocalDateTime convertToLocalDateTime(Date someDate) {
-		final long timeMillis = someDate.getTime();
-		final Instant ofEpochMilli = Instant.ofEpochMilli(timeMillis);
-		final ZonedDateTime atZone = ofEpochMilli.atZone(ZoneId.systemDefault());
-		final LocalDateTime localDateTime = atZone.toLocalDateTime();
-		return localDateTime;
-	}
-
 	public Post loadMessage(final String messageToken) throws CxException {
 		log.info("load message " + messageToken);
 		PreparedStatement stmtSelectMsg = null;
@@ -294,6 +286,7 @@ public class DataAccess {
 				post.setOriginalFrom(rsMsg.getString("sender"));
 				final Date processing = rsMsg.getDate("processing");
 				post.setProcessingTime(convertToLocalDateTime(processing));
+				post.setRandom(rsMsg.getString("token"));
 				post.setStatus(rsMsg.getInt("status"));
 				final Date updateTime = rsMsg.getDate("update_time");
 				post.setStatusUpdateTime(convertToLocalDateTime(updateTime));
@@ -310,6 +303,14 @@ public class DataAccess {
 			if (stmtSelectMsg != null) try { stmtSelectMsg.close(); } catch (Exception e) { };
 		}
 		return null;
+	}
+
+	private LocalDateTime convertToLocalDateTime(Date someDate) {
+		final long timeMillis = someDate.getTime();
+		final Instant ofEpochMilli = Instant.ofEpochMilli(timeMillis);
+		final ZonedDateTime atZone = ofEpochMilli.atZone(ZoneId.systemDefault());
+		final LocalDateTime localDateTime = atZone.toLocalDateTime();
+		return localDateTime;
 	}
 	
 }

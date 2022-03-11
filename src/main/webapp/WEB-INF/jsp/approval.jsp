@@ -15,8 +15,7 @@
             <div class="container">
                 <h1 class="title">Moderation</h1>
                 <p class="subtitle">Freigabe einer Nachricht</p>
-                
-				<form hx-post="${approvalpath}" hx-target="#submit-div" hx-swap="outerHTML">
+				<form hx-post="/mod/${post.random}" hx-target="#submit-div" hx-swap="outerHTML">
 				
 					 <div class="field">
 					  <label class="label">Betreff</label>
@@ -60,7 +59,7 @@
 					
 					<div class="field is-grouped" id="submit-div">
 					  <div class="control">
-					    <button class="button btn" type="submit">Ok</button>
+					    <button class="button btn is-link" type="submit">Speichern</button>
 					  </div>
 					</div>
 				</form>

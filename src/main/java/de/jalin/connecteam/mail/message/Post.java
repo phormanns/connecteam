@@ -14,7 +14,7 @@ public class Post {
 	public final static int POST_NEEDS_APPROVAL = 1;
 	public final static int POST_ON_HOLD = 2;
 	
-	private final String random;
+	private String random;
 	private String subject;
 	private String fromAddress;
 	private String originalFrom;
@@ -34,6 +34,10 @@ public class Post {
 	
 	public String getRandom() {
 		return random;
+	}
+
+	public void setRandom(String random) {
+		this.random = random;
 	}
 
 	public String getSubject() {

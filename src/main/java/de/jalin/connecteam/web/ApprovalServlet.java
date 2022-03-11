@@ -38,11 +38,12 @@ public class ApprovalServlet extends HttpServlet {
 			final String messageId = pathItems[0];
 			log.info("approve message " + messageId);
 			final Post post = dataAccess.loadMessage(messageId);
-			if (post == null) {
-				throw new ServletException("message_not_found_in_database");
-			}
 			final HttpSession session = req.getSession();
-			session.setAttribute("approvalpath", pathInfo);
+			if (post == null) {
+				session.setAttribute("errormessage", "Diese Nachricht gibt es nicht in der Datenbank. Bitte prüfen Sie den Link.");
+				req.getRequestDispatcher("/WEB-INF/jsp/error.jsp").forward(req, resp);
+				return;
+			}
 			session.setAttribute("post", post);
 			req.getRequestDispatcher("/WEB-INF/jsp/approval.jsp").forward(req, resp);
 		} catch (SQLException | IOException | CxException e) {
@@ -58,19 +59,28 @@ public class ApprovalServlet extends HttpServlet {
 			final String[] pathItems = pathInfo.substring(1).split("/");
 			final String messageId = pathItems[0];
 			log.info("approve message " + messageId);
-			Object senderMaySend = req.getParameter("sendermaysend");
-			Object approvalMessage = req.getParameter("approval");
+			Object senderMaySendParam = req.getParameter("sendermaysend");
+			Object approvalMessageParam = req.getParameter("approval");
+			boolean senderMaySend = senderMaySendParam instanceof String &&  "on".equalsIgnoreCase((String) senderMaySendParam);
+			boolean approveMessage = approvalMessageParam instanceof String && "approve-message".equals(approvalMessageParam);   
 			log.info("  senderMaySend " + senderMaySend);
-			log.info("  approval " + approvalMessage);
+			log.info("  approval " + approveMessage);
 			final Post post = dataAccess.loadMessage(messageId);
 			if (post == null) {
 				throw new ServletException("message_not_found_in_database");
 			}
 			final HttpSession session = req.getSession();
-			session.setAttribute("approvalpath", pathInfo);
 			session.setAttribute("post", post);
-			// req.getRequestDispatcher("/WEB-INF/jsp/approval.jsp").forward(req, resp);
-			resp.getWriter().write("<div>DONE</div>\n");
+			if (approvalMessageParam == null) {
+				session.setAttribute("errormessage", "Bitte entscheiden Sie, ob die Nachricht freigegeben werden kann.");
+				req.getRequestDispatcher("/WEB-INF/jsp/error-box.jsp").forward(req, resp);
+				return;
+			}
+			
+			
+			
+			session.setAttribute("successmessage", approveMessage ? "Die Nachricht wurde freigegeben." : "Die Nachricht wurde zurückgewiesen.");
+			req.getRequestDispatcher("/WEB-INF/jsp/success-box.jsp").forward(req, resp);
 		} catch (SQLException | IOException | CxException e) {
 			throw new ServletException(e);
 		} 
