@@ -72,6 +72,11 @@ public class DataAccess {
 		+ " FROM message msg, attachment att"
 		+ " WHERE att.message_id = msg.id AND msg.token = ? AND att.path_token = ?";
 
+	private static final String SELECT_ATTACHMENTS = 
+			  "SELECT att.path_token AS att_token, att.mime_type AS mime_type, att.filename AS filename "
+			+ " FROM attachment att"
+			+ " WHERE att.message_id = ? ";
+
 	private static final String SELECT_MESSAGE = 
 		  "SELECT msg.id AS id, msg.subject AS subject, msg.processing AS processing, msg.sender AS sender, msg.token AS token,"
 		+ " msg.message AS message, msg.status AS status, msg.update_time AS update_time, tp.address AS tp_address,"
@@ -131,6 +136,33 @@ public class DataAccess {
 			log.error(e);
 		}
 		return null;
+	}
+	
+	public void loadAttachments(final Post msg) {
+		final long msgId = msg.getId();
+		log.info("load attachments for message " + msgId);
+		msg.getAttachments().clear();
+		PreparedStatement stmtSelectAttachments = null;
+		ResultSet resAttachments = null;
+		try {
+			stmtSelectAttachments = dbConnection.prepareStatement(SELECT_ATTACHMENTS);
+			stmtSelectAttachments.setLong(1, msgId);
+			resAttachments = stmtSelectAttachments.executeQuery();
+			while (resAttachments.next()) {
+				final AttachmentPath attPath = new AttachmentPath();
+				attPath.setContentType(resAttachments.getString("mime_type"));
+				attPath.setFilename(resAttachments.getString("att_token"));
+				attPath.setName(resAttachments.getString("filename"));
+				msg.attach(attPath);
+			}
+		} catch (SQLException e) {
+			log.error(e);
+		} finally {
+			if (resAttachments != null)
+				try { resAttachments.close(); } catch (SQLException e) { }
+			if (stmtSelectAttachments != null)
+				try { stmtSelectAttachments.close(); } catch (SQLException e) { }
+		}
 	}
 	
 	public void storeMessage(final Post post, final long topicId) throws CxException {

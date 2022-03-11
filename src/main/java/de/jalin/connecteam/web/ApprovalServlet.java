@@ -87,6 +87,7 @@ public class ApprovalServlet extends HttpServlet {
 			
 			if (approveMessage) {
 				final Topic topic = dataAccess.loadTopic(post.getFromAddress());
+				dataAccess.loadAttachments(post);
 				final Sendmail sendmail = new Sendmail(topic);
 				sendmail.sendPost(post);
 			}
