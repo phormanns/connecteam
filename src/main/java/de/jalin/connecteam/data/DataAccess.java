@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -24,51 +25,57 @@ public class DataAccess {
 	private static final Logger log = Logger.getLogger("DataAccess.class");
 	
 	private static final String LIST_SPACES = 
-			  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc,"
-			+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.web_domain AS tp_webdomain, tp.address AS tp_address,"
-			+ " tp.imap_host AS imap_host, tp.imap_port AS imap_port, tp.imap_starttls AS imap_starttls, tp.imap_login AS imap_login, tp.imap_passwd AS imap_passwd,"
-			+ " tp.smtp_host AS smtp_host, tp.smtp_port AS smtp_port, tp.smtp_starttls AS smtp_starttls, tp.smtp_login AS smtp_login, tp.smtp_passwd AS smtp_passwd "
-			+ "FROM workspace ws, topic tp "
-			+ "WHERE tp.workspace_id = ws.id ORDER BY tp.id";
+		  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc,"
+		+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.web_domain AS tp_webdomain, tp.address AS tp_address,"
+		+ " tp.imap_host AS imap_host, tp.imap_port AS imap_port, tp.imap_starttls AS imap_starttls, tp.imap_login AS imap_login, tp.imap_passwd AS imap_passwd,"
+		+ " tp.smtp_host AS smtp_host, tp.smtp_port AS smtp_port, tp.smtp_starttls AS smtp_starttls, tp.smtp_login AS smtp_login, tp.smtp_passwd AS smtp_passwd "
+		+ "FROM workspace ws, topic tp "
+		+ "WHERE tp.workspace_id = ws.id ORDER BY tp.id";
 
 	private static final String SELECT_TOPIC = 
-			  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc, tp.web_domain AS tp_webdomain,"
-			+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.address AS tp_address,"
-			+ " tp.imap_host AS imap_host, tp.imap_port AS imap_port, tp.imap_starttls AS imap_starttls, tp.imap_login AS imap_login, tp.imap_passwd AS imap_passwd,"
-			+ " tp.smtp_host AS smtp_host, tp.smtp_port AS smtp_port, tp.smtp_starttls AS smtp_starttls, tp.smtp_login AS smtp_login, tp.smtp_passwd AS smtp_passwd "
-			+ "FROM workspace ws, topic tp "
-			+ "WHERE tp.workspace_id = ws.id AND tp.address = ? ";
+		  "SELECT ws.id AS ws_id, ws.name AS ws_name, ws.description AS ws_desc, tp.web_domain AS tp_webdomain,"
+		+ " tp.id AS tp_id, tp.name AS tp_name, tp.description AS tp_desc, tp.address AS tp_address,"
+		+ " tp.imap_host AS imap_host, tp.imap_port AS imap_port, tp.imap_starttls AS imap_starttls, tp.imap_login AS imap_login, tp.imap_passwd AS imap_passwd,"
+		+ " tp.smtp_host AS smtp_host, tp.smtp_port AS smtp_port, tp.smtp_starttls AS smtp_starttls, tp.smtp_login AS smtp_login, tp.smtp_passwd AS smtp_passwd "
+		+ "FROM workspace ws, topic tp "
+		+ "WHERE tp.workspace_id = ws.id AND tp.address = ? ";
 	
 	private static final String SELECT_SUBSCRIPTIONS = 
-			  "SELECT scr.id AS scr_id, scr.address AS scr_address, scr.name AS scr_name,"
-			+ " scn.id AS scn_id,"
-			+ " scn.recieves_digest AS recieves_digest, scn.recieves_messages AS recieves_messages,"
-			+ " scn.recieves_moderation AS recieves_moderation, scn.may_send_messages AS may_send_messages, "
-			+ " scn.subscribe_date AS subscribe_date, scn.unsubscribe_date AS unsubscribe_date "
-			+ "FROM subscriber scr, subscription scn "
-			+ "WHERE scr.id = scn.subscriber_id AND scn.topic_id = ? ";
+		  "SELECT scr.id AS scr_id, scr.address AS scr_address, scr.name AS scr_name,"
+		+ " scn.id AS scn_id,"
+		+ " scn.recieves_digest AS recieves_digest, scn.recieves_messages AS recieves_messages,"
+		+ " scn.recieves_moderation AS recieves_moderation, scn.may_send_messages AS may_send_messages, "
+		+ " scn.subscribe_date AS subscribe_date, scn.unsubscribe_date AS unsubscribe_date "
+		+ "FROM subscriber scr, subscription scn "
+		+ "WHERE scr.id = scn.subscriber_id AND scn.topic_id = ? ";
 	
 	private static final String INSERT_MESSAGE =
-			  "INSERT INTO message (topic_id, subject, processing, sender, message, token)"
-			+ " values ( ?, ?, now(), ?, ?, ? )";
+		  "INSERT INTO message (topic_id, subject, processing, sender, message, token)"
+		+ " VALUES ( ?, ?, now(), ?, ?, ? )";
 
 	private static final String INSERT_ATTACHMENT =
-			  "INSERT INTO attachment (message_id, filename, mime_type, path_token)"
-			+ " values ( ?, ?, ?, ? )";
+		  "INSERT INTO attachment (message_id, filename, mime_type, path_token)"
+		+ " VALUES ( ?, ?, ?, ? )";
 
 	private static final String SELECT_ATTACHMENT = 
-			  "SELECT msg.token AS msg_token, att.path_token AS att_token, att.mime_type AS mime_type, att.filename AS filename "
-			+ " FROM message msg, attachment att"
-			+ " WHERE att.message_id = msg.id AND msg.token = ? AND att.path_token = ?";
+		  "SELECT msg.token AS msg_token, att.path_token AS att_token, att.mime_type AS mime_type, att.filename AS filename "
+		+ " FROM message msg, attachment att"
+		+ " WHERE att.message_id = msg.id AND msg.token = ? AND att.path_token = ?";
 
 	private static final String SELECT_MESSAGE = 
-			  "SELECT msg.id AS id, msg.subject AS subject, msg.processing AS processing, msg.sender AS sender, msg.token AS token,"
-			+ " msg.message AS message, msg.status AS status, msg.update_time AS update_time, tp.address AS tp_address "
-			+ " FROM message msg, topic tp"
-			+ " WHERE tp.id = msg.topic_id AND msg.token = ?";
+		  "SELECT msg.id AS id, msg.subject AS subject, msg.processing AS processing, msg.sender AS sender, msg.token AS token,"
+		+ " msg.message AS message, msg.status AS status, msg.update_time AS update_time, tp.address AS tp_address "
+		+ " FROM message msg, topic tp"
+		+ " WHERE tp.id = msg.topic_id AND msg.token = ?";
+
+	private static final String INSERT_MESSAGE_STATUS =
+		  "INSERT INTO message_status (status, update_time, message_id) VALUES ( ?, ?, ? )";
+
+	private static final String UPDATE_MESSAGE_STATUS =
+		  "UPDATE message SET status = ?, update_time = ? WHERE id = ? ";
 
 	private static final String LAST_VAL =
-			  "SELECT LASTVAL() AS last_id";
+		  "SELECT LASTVAL() AS last_id";
 	
 	private final Connection dbConnection;
 
@@ -134,7 +141,45 @@ public class DataAccess {
 			dbConnection.setAutoCommit(true);
 		} catch (SQLException e) {
 			log.error(e);
+			try {
+				dbConnection.rollback();
+				dbConnection.setAutoCommit(true);
+			} catch (SQLException e1) { }
 			throw new CxException(e);
+		}
+	}
+	
+	public void updateMessageStatus(final Post mesg) throws CxException {
+		log.info("update message status " + mesg.getRandom() + " Status: " + mesg.getStatus());
+		PreparedStatement updateMessage = null;
+		PreparedStatement insertMessageStatus = null;
+		final Timestamp now = new Timestamp(System.currentTimeMillis());
+		try {
+			dbConnection.setAutoCommit(false);
+			updateMessage = dbConnection.prepareStatement(UPDATE_MESSAGE_STATUS);
+			updateMessage.setInt(1, mesg.getStatus());
+			updateMessage.setTimestamp(2, now);
+			updateMessage.setLong(3, mesg.getId());
+			updateMessage.executeUpdate();
+			insertMessageStatus = dbConnection.prepareStatement(INSERT_MESSAGE_STATUS);
+			insertMessageStatus.setInt(1, mesg.getStatus());
+			insertMessageStatus.setTimestamp(2, now);
+			insertMessageStatus.setLong(3, mesg.getId());
+			insertMessageStatus.executeUpdate();
+			dbConnection.commit();
+			dbConnection.setAutoCommit(true);
+		} catch (SQLException e) {
+			log.error(e);
+			try {
+				dbConnection.rollback();
+				dbConnection.setAutoCommit(true);
+			} catch (SQLException e1) { }
+			throw new CxException(e);
+		} finally {
+			if (updateMessage != null)
+				try { updateMessage.close(); } catch (SQLException e) { }
+			if (insertMessageStatus != null)
+				try { insertMessageStatus.close(); } catch (SQLException e) { }
 		}
 	}
 	
@@ -281,6 +326,7 @@ public class DataAccess {
 			rsMsg = stmtSelectMsg.executeQuery();
 			if (rsMsg.next()) {
 				final Post post = new Post();
+				post.setId(rsMsg.getLong("id"));
 				final String topicAddress = rsMsg.getString("tp_address");
 				post.setFromAddress(topicAddress);
 				post.setOriginalFrom(rsMsg.getString("sender"));

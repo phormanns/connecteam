@@ -31,6 +31,9 @@ CREATE TABLE subscriber (
     name character varying(96)
 );
 
+CREATE UNIQUE INDEX subscriber_address_idx
+	ON subscriber(address);
+
 CREATE TABLE subscription (
     id SERIAL PRIMARY KEY,
     subscriber_id integer NOT NULL,

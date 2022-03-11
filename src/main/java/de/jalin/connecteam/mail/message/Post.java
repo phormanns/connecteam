@@ -14,6 +14,7 @@ public class Post {
 	public final static int POST_NEEDS_APPROVAL = 1;
 	public final static int POST_ON_HOLD = 2;
 	
+	private long id;
 	private String random;
 	private String subject;
 	private String fromAddress;
@@ -32,6 +33,14 @@ public class Post {
 		attachments = new HashMap<>();
 	}
 	
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	public String getRandom() {
 		return random;
 	}

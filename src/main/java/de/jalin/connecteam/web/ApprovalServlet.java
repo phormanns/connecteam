@@ -77,7 +77,11 @@ public class ApprovalServlet extends HttpServlet {
 				return;
 			}
 			
-			
+			post.setStatus(approveMessage ? Post.POST_ACCEPTED : Post.POST_REJECTED);
+			dataAccess.updateMessageStatus(post);
+			if (senderMaySend) {
+				
+			}
 			
 			session.setAttribute("successmessage", approveMessage ? "Die Nachricht wurde freigegeben." : "Die Nachricht wurde zurückgewiesen.");
 			req.getRequestDispatcher("/WEB-INF/jsp/success-box.jsp").forward(req, resp);
